@@ -8,6 +8,25 @@ pub struct Captcha {
 	pub dark_mode: bool,
 }
 
+//! Generate a verification image.
+//!
+//! ```rust
+//! use captcha_rs::Captcha;
+//!
+//! fn main() {
+//!
+//!    let dark_mode = true;
+//!    let text_length = 5;
+//!    let width = 130;
+//!    let height = 40;
+//!
+//!    let captcha = Captcha::new(text_length, width, height, dark_mode);
+//!
+//!    println!("text: {}", captcha.text);
+//!    println!("base_img: {}", captcha.base_img);
+//!
+//! }
+//! ```
 impl Captcha {
 	pub fn new(num: usize, width: u32, height: u32, dark_mode: bool) -> Self {
 		// Generate an array of captcha characters
