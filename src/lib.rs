@@ -1,7 +1,3 @@
-use crate::captcha::{get_captcha, get_captcha_img};
-
-mod captcha;
-
 //! Generate a verification image.
 //!
 //! ```rust
@@ -21,6 +17,11 @@ mod captcha;
 //!
 //! }
 //! ```
+
+use crate::captcha::{get_captcha, get_captcha_img};
+
+mod captcha;
+
 pub struct Captcha {
 	pub text: String,
 	pub base_img: String,
