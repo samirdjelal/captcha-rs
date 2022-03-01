@@ -30,16 +30,23 @@ mod tests {
 	#[test]
 	fn it_generates_a_captcha() {
 		let dark_mode = false;
+		let text_length = 5;
+		let width = 130;
+		let height = 40;
+		
 		let start = std::time::Instant::now();
-		let captcha = Captcha::new(6, 130, 40, dark_mode);
+		let captcha = Captcha::new(text_length, width, height, dark_mode);
 		let duration = start.elapsed();
 		println!("Time elapsed in generating captcha() is: {:?}", duration);
-		assert_eq!(captcha.text.len(), 6);
+		
+		assert_eq!(captcha.text.len(), 5);
 		
 		let start_with = captcha.base_img.starts_with("data:image/png;base64,");
 		assert_eq!(start_with, true);
 		
-		println!("test: {}, base_img: {}", captcha.text, captcha.base_img);
+		
+		println!("text: {}", captcha.text);
+		println!("base_img: {}", captcha.base_img);
 	}
 }
 

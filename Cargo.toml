@@ -1,6 +1,6 @@
 [package]
 name = "captcha-rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Samir Djelal <ssdjelal@gmail.com>"]
 readme = "README.md"
@@ -10,7 +10,9 @@ homepage ="https://github.com/samirdjelal/captcha-rs"
 documentation = "https://github.com/samirdjelal/captcha-rs/blob/main/README.md"
 keywords = ["captcha-rs", "captcha"]
 description = "Generate verification images dynamically"
-
+exclude = [
+    "images/*",
+]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
