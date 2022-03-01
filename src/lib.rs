@@ -2,12 +2,6 @@ use crate::captcha::{get_captcha, get_captcha_img};
 
 mod captcha;
 
-pub struct Captcha {
-	pub text: String,
-	pub base_img: String,
-	pub dark_mode: bool,
-}
-
 //! Generate a verification image.
 //!
 //! ```rust
@@ -27,6 +21,12 @@ pub struct Captcha {
 //!
 //! }
 //! ```
+pub struct Captcha {
+	pub text: String,
+	pub base_img: String,
+	pub dark_mode: bool,
+}
+
 impl Captcha {
 	pub fn new(num: usize, width: u32, height: u32, dark_mode: bool) -> Self {
 		// Generate an array of captcha characters
