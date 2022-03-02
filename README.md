@@ -7,9 +7,9 @@
 Example pictures are as follows:
 
 
- ![img-light-1.png](images/img-light-1.png) | ![img-light-1.png](images/img-light-2.png) | ![img-light-1.png](images/img-light-2.png) 
+ ![img-light-1.png](images/img-light-1.png) | ![img-light-2.png](images/img-light-2.png) | ![img-light-3.png](images/img-light-3.png) 
    ---- | ----- | ------  
- ![img-dark-1.png](images/img-dark-1.png) | ![img-dark-1.png](images/img-dark-2.png) | ![img-dark-1.png](images/img-dark-2.png) 
+ ![img-dark-1.png](images/img-dark-1.png) | ![img-dark-2.png](images/img-dark-2.png) | ![img-dark-3.png](images/img-dark-3.png) 
 
 ## Example
 
