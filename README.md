@@ -40,6 +40,11 @@ fn main() {
 }
 ```
 
+### Test
+
+```bash
+$ cargo test -- --nocapture
+```
 
 ## License
 
