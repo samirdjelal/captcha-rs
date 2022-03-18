@@ -1,3 +1,5 @@
+#![doc(html_root_url = "https://docs.rs/captcha-rs/latest")]
+
 //! Generate a verification image.
 //!
 //! ```rust
