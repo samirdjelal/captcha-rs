@@ -1,10 +1,10 @@
 # Captcha-rs
 
-[![Current Crates.io Version](https://img.shields.io/crates/v/captcha-rs.svg)](https://crates.io/crates/captcha-rs)
+[![Captcha-rs crate](https://img.shields.io/crates/v/captcha-rs.svg)](https://crates.io/crates/captcha-rs)
 [![MIT License](https://img.shields.io/crates/l/captcha-rs)](LICENSE)
-[![Docs.rs](https://img.shields.io/docsrs/captcha-rs)](https://docs.rs/captcha-rs/0.1.3/captcha_rs)
+[![Captcha-rs documentation](https://img.shields.io/docsrs/captcha-rs)](https://docs.rs/captcha-rs)
 [![Recent Downloads](https://img.shields.io/crates/dr/captcha-rs)](https://crates.io/crates/captcha-rs)
-[![Sponsors](https://img.shields.io/github/sponsors/samirdjelal)](https://github.com/samirdjelal)
+[![build status](https://github.com/samirdjelal/captcha-rs/workflows/master/badge.svg)](https://github.com/samirdjelal/captcha-rs/actions)
 
 **captcha-rs** is a library that generate verification images dynamically.
 
@@ -20,7 +20,7 @@ Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.1.5"
+captcha-rs = "0.1"
 ```
 
 And then get started in your `main.rs`:
