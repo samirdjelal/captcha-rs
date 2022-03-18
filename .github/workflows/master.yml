@@ -1,0 +1,29 @@
+name: master
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: Test (stable)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --verbose
+      - name: Test captcha-rs
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --verbose --package captcha-rs
