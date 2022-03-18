@@ -1,15 +1,18 @@
 # Captcha-rs
 
 [![Current Crates.io Version](https://img.shields.io/crates/v/captcha-rs.svg)](https://crates.io/crates/captcha-rs)
+[![MIT License](https://img.shields.io/crates/l/captcha-rs)](LICENSE)
+[![Docs.rs](https://img.shields.io/docsrs/captcha-rs)](https://docs.rs/captcha-rs/0.1.3/captcha_rs)
+[![Recent Downloads](https://img.shields.io/crates/dr/captcha-rs)](https://crates.io/crates/captcha-rs)
+[![Sponsors](https://img.shields.io/github/sponsors/samirdjelal)](https://github.com/samirdjelal)
 
 **captcha-rs** is a library that generate verification images dynamically.
 
 Example pictures are as follows:
 
-
- ![img-light-1.png](images/img-light-1.png) | ![img-light-2.png](images/img-light-2.png) | ![img-light-3.png](images/img-light-3.png) 
-   ---- | ----- | ------  
- ![img-dark-1.png](images/img-dark-1.png) | ![img-dark-2.png](images/img-dark-2.png) | ![img-dark-3.png](images/img-dark-3.png) 
+![img-light-1.png](images/img-light-1.png) | ![img-light-2.png](images/img-light-2.png) | ![img-light-3.png](images/img-light-3.png) 
+--- | --- | ---
+![img-dark-1.png](images/img-dark-1.png) | ![img-dark-2.png](images/img-dark-2.png) | ![img-dark-3.png](images/img-dark-3.png) 
 
 ## Example
 
