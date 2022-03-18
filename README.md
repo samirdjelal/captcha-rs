@@ -20,7 +20,7 @@ Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.1.4"
+captcha-rs = "0.1.5"
 ```
 
 And then get started in your `main.rs`:
