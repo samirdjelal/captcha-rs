@@ -1,6 +1,8 @@
 //! Generate a verification image.
 //!
 //! ```rust
+//! use captcha_rs::Captcha;
+//!
 //! let dark_mode = true;
 //! let text_length = 5;
 //! let width = 130;
