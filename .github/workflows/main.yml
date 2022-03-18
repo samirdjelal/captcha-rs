@@ -1,8 +1,8 @@
-name: master
+name: main
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   test:
