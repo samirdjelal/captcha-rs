@@ -14,7 +14,7 @@ pipeline {
 
     stage('Test') {
       steps {
-        sh 'cargo test'
+        sh 'cargo test --verbose --package captcha-rs'
       }
     }
 
