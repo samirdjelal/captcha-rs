@@ -14,7 +14,7 @@ pipeline {
 
     stage('Test') {
       steps {
-        sh 'cargo test --verbose --package captcha-rs'
+        sh 'cargo test -- --nocapture'
       }
     }
 
