@@ -3,7 +3,13 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        build 'cargo build'
+        sh 'cargo build'
+      }
+    }
+
+    stage('Test') {
+      steps {
+        sh 'cargo test'
       }
     }
 
