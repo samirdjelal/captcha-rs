@@ -1,7 +1,7 @@
 # captcha-rs
 
 [![Captcha-rs crate](https://img.shields.io/crates/v/captcha-rs.svg)](https://crates.io/crates/captcha-rs)
-[![Build status](https://github.com/samirdjelal/captcha-rs/workflows/main/badge.svg)](https://github.com/samirdjelal/captcha-rs/actions)
+[![Build status](https://github.com/samirdjelal/captcha-rs/workflows/CI/badge.svg)](https://github.com/samirdjelal/captcha-rs/actions)
 [![issues](https://img.shields.io/github/issues/samirdjelal/captcha-rs?color=%23ffc107)](https://github.com/samirdjelal/captcha-rs/issues)
 [![Recent Downloads](https://img.shields.io/crates/dr/captcha-rs)](https://crates.io/crates/captcha-rs)
 [![MIT License](https://img.shields.io/crates/l/captcha-rs)](LICENSE)
