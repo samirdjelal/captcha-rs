@@ -1,4 +1,4 @@
-# Captcha-rs
+# captcha-rs
 
 [![Captcha-rs crate](https://img.shields.io/crates/v/captcha-rs.svg)](https://crates.io/crates/captcha-rs)
 [![Build status](https://github.com/samirdjelal/captcha-rs/workflows/main/badge.svg)](https://github.com/samirdjelal/captcha-rs/actions)
