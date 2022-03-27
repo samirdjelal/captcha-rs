@@ -44,9 +44,16 @@ fn main() {
 }
 ```
 
-### Test
+### Run
 
 ```bash
+# Dev
+$ cargo run
+
+# Build
+$ cargo build
+
+# Test
 $ cargo test -- --nocapture
 ```
 
