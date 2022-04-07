@@ -22,13 +22,13 @@ Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.2.0"
+captcha-rs = "0.2.1"
 ```
 
 And then get started in your `main.rs`:
 
 ```rust
-use captcha_rs::Captcha;
+use captcha_rs::{Captcha, CaptchaBuilder};
 
 fn main() {
 	let dark_mode = true;
