@@ -3,9 +3,7 @@ use image::ImageOutputFormat::Png;
 use image::{ImageBuffer, Rgb};
 use imageproc::drawing::{draw_cubic_bezier_curve_mut, draw_hollow_ellipse_mut, draw_text_mut};
 use rand::{thread_rng, Rng};
-use rusttype::Font;
-
-use rusttype::Scale;
+use rusttype::{Font, Scale};
 
 // Define the verification code characters.
 // Remove 0, O, I, L and other easily confusing letters
@@ -42,7 +40,7 @@ pub const SCALE: Scale = Scale { x: 38.0, y: 35.0 };
  * Generate random numbers
  * params num - maximum random number
  */
-fn get_rnd(num: usize) -> usize {
+pub fn get_rnd(num: usize) -> usize {
     let mut rng = thread_rng();
     rng.gen_range(0..=num)
 }
@@ -63,7 +61,7 @@ pub fn get_captcha(num: usize) -> Vec<String> {
 /**
  * Get color
  */
-fn get_color(dark_mode: bool) -> Rgb<u8> {
+pub fn get_color(dark_mode: bool) -> Rgb<u8> {
     let rnd = get_rnd(4);
     if dark_mode {
         return Rgb(BLACK_BASIC_COLOR[rnd]);
@@ -77,22 +75,22 @@ fn get_color(dark_mode: bool) -> Rgb<u8> {
  *        max – maximum value
  * return: random number
  */
-fn get_next(min: f32, max: u32) -> f32 {
+pub fn get_next(min: f32, max: u32) -> f32 {
     min + get_rnd(max as usize - min as usize) as f32
 }
 
 /**
  * Get font
  */
-fn get_font() -> Font<'static> {
-    let font = Vec::from(include_bytes!("../fonts/arial.ttf") as &[u8]);
+pub fn get_font() -> Font<'static> {
+    let font = Vec::from(include_bytes!("../../fonts/arial.ttf") as &[u8]);
     Font::try_from_vec(font).unwrap()
 }
 
 /**
  * Get an image with a white background
  */
-fn get_image(width: u32, height: u32, dark_mode: bool) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
+pub fn get_image(width: u32, height: u32, dark_mode: bool) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     ImageBuffer::from_fn(width, height, |_, _| {
         if dark_mode {
             return image::Rgb(BLACK);
@@ -106,7 +104,7 @@ fn get_image(width: u32, height: u32, dark_mode: bool) -> ImageBuffer<Rgb<u8>, V
  * params res    - Array of verification code characters to be written
  *        image  - Background picture
  */
-fn cyclic_write_character(
+pub fn cyclic_write_character(
     res: &[String],
     image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     dark_mode: bool,
@@ -131,7 +129,7 @@ fn cyclic_write_character(
  * Draw interference lines
  * params image  - Background picture
  */
-fn draw_interference_line(image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, dark_mode: bool) {
+pub fn draw_interference_line(image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, dark_mode: bool) {
     let width = image.width();
     let height = image.height();
     let x1: f32 = 5.0;
@@ -161,13 +159,13 @@ fn draw_interference_line(image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, dark_mode: 
  * params num    - Number of circles drawn
  *        image  - Background picture
  */
-fn draw_interference_ellipse(
+pub fn draw_interference_ellipse(
     num: usize,
     image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     dark_mode: bool,
 ) {
     for _ in 0..num {
-        let w = (2 + get_rnd(5)) as i32;
+        let w = (10 + get_rnd(5)) as i32;
         let x = get_rnd((image.width() - 25) as usize) as i32;
         let y = get_rnd((image.height() - 15) as usize) as i32;
         draw_hollow_ellipse_mut(image, (x, y), w, w, get_color(dark_mode));
@@ -178,7 +176,7 @@ fn draw_interference_ellipse(
  * Convert image to base 64 string
  * parma image - Image
  */
-fn to_base64_str(image: ImageBuffer<Rgb<u8>, Vec<u8>>) -> String {
+pub fn to_base64_str(image: ImageBuffer<Rgb<u8>, Vec<u8>>) -> String {
     let base_img = DynamicImage::ImageRgb8(image);
     let mut buf = vec![];
     base_img.write_to(&mut buf, Png).unwrap();
