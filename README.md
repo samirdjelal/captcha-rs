@@ -22,33 +22,27 @@ Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.2.1"
+captcha-rs = "0.2.2"
 ```
 
 And then get started in your `main.rs`:
 
 ```rust
-use captcha_rs::{Captcha, CaptchaBuilder};
+use captcha_rs::CaptchaBuilder;
 
 fn main() {
-	let dark_mode = true;
-	let text_length = 5;
-	let width = 130;
-	let height = 40;
 	
-	// generate a captcha with the given parameters
-	let captcha = Captcha::new(text_length, width, height, dark_mode);
-	
-	// generate a captcha using builder pattern
 	let captcha = CaptchaBuilder::new()
 		.length(5)
 		.width(130)
 		.height(40)
 		.dark_mode(false)
+		.complexity(1) // min: 1, max: 10
 		.build();
 	
 	println!("text: {}", captcha.text);
 	println!("base_img: {}", captcha.base_img);
+	
 }
 ```
 
