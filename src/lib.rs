@@ -16,7 +16,7 @@
 //! println!("text: {}", captcha.text);
 //! println!("base_img: {}", captcha.base_img);
 //! ```
-use imageproc::noise::{gaussian_noise_mut};
+use imageproc::noise::{gaussian_noise_mut, salt_and_pepper_noise_mut};
 use crate::captcha::{cyclic_write_character, draw_interference_ellipse, draw_interference_line, get_image, to_base64_str};
 
 mod captcha;
@@ -116,7 +116,9 @@ impl CaptchaBuilder {
 		draw_interference_ellipse(2, &mut image, dark_mode);
 		draw_interference_ellipse(2, &mut image, dark_mode);
 		
-		gaussian_noise_mut(&mut image, (complexity.clone() - 1) as f64, ((10 * complexity.clone()) - 10) as f64, ((10 * complexity.clone()) - 10) as u64);
+		gaussian_noise_mut(&mut image, (complexity.clone() - 1) as f64, ((10 * complexity.clone()) - 10) as f64, ((5 * complexity.clone()) - 10) as u64);
+		salt_and_pepper_noise_mut(&mut image, ((0.01 * complexity.clone() as f64) - 0.01) as f64, 1 * complexity.clone() as u64);
+		
 		
 		// Convert to base 64 string
 		let base_img = to_base64_str(image);

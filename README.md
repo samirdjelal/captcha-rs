@@ -16,13 +16,29 @@ Example pictures are as follows:
 --- | --- | ---
 ![img-dark-1.png](images/img-dark-1.png) | ![img-dark-2.png](images/img-dark-2.png) | ![img-dark-3.png](images/img-dark-3.png)
 
+### Using complexity method
+
+Complexity | Dark Mode / Noise Filter | Light Mode / Noise Filter
+--- | --- | ---
+Level 1 | ![img-dark](images/img-light-complexity-1.png) | ![img-light](images/img-dark-complexity-1.png)
+Level 2 | ![img-dark](images/img-light-complexity-2.png) | ![img-light](images/img-dark-complexity-2.png)
+Level 3 | ![img-dark](images/img-light-complexity-3.png) | ![img-light](images/img-dark-complexity-3.png)
+Level 4 | ![img-dark](images/img-light-complexity-4.png) | ![img-light](images/img-dark-complexity-4.png)
+Level 5 | ![img-dark](images/img-light-complexity-5.png) | ![img-light](images/img-dark-complexity-5.png)
+Level 6 | ![img-dark](images/img-light-complexity-6.png) | ![img-light](images/img-dark-complexity-6.png)
+Level 7 | ![img-dark](images/img-light-complexity-7.png) | ![img-light](images/img-dark-complexity-7.png)
+Level 8 | ![img-dark](images/img-light-complexity-8.png) | ![img-light](images/img-dark-complexity-8.png)
+Level 9 | ![img-dark](images/img-light-complexity-9.png) | ![img-light](images/img-dark-complexity-9.png)
+Level 10 | ![img-dark](images/img-light-complexity-10.png) | ![img-light](images/img-dark-complexity-10.png)
+
+
 ## Example
 
 Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.2.2"
+captcha-rs = "0.2.3"
 ```
 
 And then get started in your `main.rs`:
