@@ -66,13 +66,13 @@ fn main() {
 
 ```bash
 # Dev
-$ cargo run
+💲 cargo run
 
 # Build
-$ cargo build
+💲 cargo build
 
 # Test
-$ cargo test -- --nocapture
+💲 cargo test -- --nocapture
 ```
 
 ## License
