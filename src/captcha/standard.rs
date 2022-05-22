@@ -14,14 +14,14 @@ pub const BASIC_CHAR: [char; 54] = [
 ];
 
 // Define a random color for a string
-pub const WHITE_BASIC_COLOR: [[u8; 3]; 5] = [
+pub const LIGHT_BASIC_COLOR: [[u8; 3]; 5] = [
 	[214, 14, 50],
 	[240, 181, 41],
 	[176, 203, 40],
 	[105, 137, 194],
 	[242, 140, 71],
 ];
-pub const BLACK_BASIC_COLOR: [[u8; 3]; 5] = [
+pub const DARK_BASIC_COLOR: [[u8; 3]; 5] = [
 	[251, 188, 5],
 	[116, 192, 255],
 	[255, 224, 133],
@@ -30,8 +30,8 @@ pub const BLACK_BASIC_COLOR: [[u8; 3]; 5] = [
 ];
 
 // Define background color
-pub const WHITE: [u8; 3] = [248, 248, 255];
-pub const BLACK: [u8; 3] = [18, 18, 18];
+pub const LIGHT: [u8; 3] = [224, 238, 253];
+pub const DARK: [u8; 3] = [18, 18, 18];
 
 // Define font size
 pub const SCALE_SM: Scale = Scale { x: 38.0, y: 35.0 };
@@ -66,9 +66,9 @@ pub fn get_captcha(num: usize) -> Vec<String> {
 pub fn get_color(dark_mode: bool) -> Rgb<u8> {
 	let rnd = get_rnd(4);
 	if dark_mode {
-		return Rgb(BLACK_BASIC_COLOR[rnd]);
+		return Rgb(DARK_BASIC_COLOR[rnd]);
 	}
-	Rgb(WHITE_BASIC_COLOR[rnd])
+	Rgb(LIGHT_BASIC_COLOR[rnd])
 }
 
 /**
@@ -95,9 +95,9 @@ pub fn get_font() -> Font<'static> {
 pub fn get_image(width: u32, height: u32, dark_mode: bool) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
 	ImageBuffer::from_fn(width, height, |_, _| {
 		if dark_mode {
-			return image::Rgb(BLACK);
+			return image::Rgb(DARK);
 		}
-		image::Rgb(WHITE)
+		image::Rgb(LIGHT)
 	})
 }
 
@@ -115,8 +115,8 @@ pub fn cyclic_write_character(
 	let y = image.height() / 2 - 15;
 	
 	let scale = match res.len() {
-		1..=4 => SCALE_LG,
-		5 => SCALE_MD,
+		1..=3 => SCALE_LG,
+		4..=5 => SCALE_MD,
 		_ => SCALE_SM,
 	};
 	
