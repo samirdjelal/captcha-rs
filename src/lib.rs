@@ -120,8 +120,10 @@ impl CaptchaBuilder {
 		draw_interference_ellipse(2, &mut image, dark_mode);
 		draw_interference_ellipse(2, &mut image, dark_mode);
 		
-		gaussian_noise_mut(&mut image, (complexity.clone() - 1) as f64, ((10 * complexity.clone()) - 10) as f64, ((5 * complexity.clone()) - 5) as u64);
-		salt_and_pepper_noise_mut(&mut image, ((0.001 * complexity.clone() as f64) - 0.001) as f64, (0.5 * complexity.clone() as f64) as u64);
+		if complexity > 1 {
+			gaussian_noise_mut(&mut image, (complexity.clone() - 1) as f64, ((10 * complexity.clone()) - 10) as f64, ((5 * complexity.clone()) - 5) as u64);
+			salt_and_pepper_noise_mut(&mut image, ((0.001 * complexity.clone() as f64) - 0.001) as f64, (0.5 * complexity.clone() as f64) as u64);
+		}
 		
 		
 		// Convert to base 64 string
