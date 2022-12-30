@@ -14,8 +14,10 @@
 //! 	.build();
 //!
 //! println!("text: {}", captcha.text);
-//! println!("base_img: {}", captcha.base_img);
+//! let base_img = captcha.to_base64();
+//! println!("base_img: {}", base_img);
 //! ```
+use image::{DynamicImage};
 use imageproc::noise::{gaussian_noise_mut, salt_and_pepper_noise_mut};
 use crate::captcha::{cyclic_write_character, draw_interference_ellipse, draw_interference_line, get_image, to_base64_str};
 
@@ -23,23 +25,13 @@ mod captcha;
 
 pub struct Captcha {
 	pub text: String,
-	pub base_img: String,
+	pub image: DynamicImage,
 	pub dark_mode: bool,
 }
 
 impl Captcha {
-	pub fn new(length: usize, width: u32, height: u32, dark_mode: bool) -> Self {
-		// Generate an array of captcha characters
-		let res = captcha::get_captcha(length);
-		let text = res.join("");
-		// Generate an image based on the verification code character array and convert the image into a base 64 string
-		let base_img = captcha::get_captcha_img(res, width, height, dark_mode);
-		
-		Captcha {
-			text,
-			base_img,
-			dark_mode,
-		}
+	pub fn to_base64(&self) -> String {
+		to_base64_str(&self.image)
 	}
 }
 
@@ -119,13 +111,9 @@ impl CaptchaBuilder {
 		gaussian_noise_mut(&mut image, (complexity.clone() - 1) as f64, ((10 * complexity.clone()) - 10) as f64, ((5 * complexity.clone()) - 5) as u64);
 		salt_and_pepper_noise_mut(&mut image, ((0.001 * complexity.clone() as f64) - 0.001) as f64, (0.5 * complexity.clone() as f64) as u64);
 		
-		
-		// Convert to base 64 string
-		let base_img = to_base64_str(image);
-		
 		Captcha {
 			text,
-			base_img,
+			image: DynamicImage::ImageRgb8(image),
 			dark_mode,
 		}
 	}
@@ -133,30 +121,7 @@ impl CaptchaBuilder {
 
 #[cfg(test)]
 mod tests {
-	use crate::{Captcha, CaptchaBuilder};
-	
-	#[test]
-	fn it_generates_a_captcha() {
-		let dark_mode = false;
-		let text_length = 5;
-		let width = 130;
-		let height = 40;
-		
-		let start = std::time::Instant::now();
-		
-		let captcha = Captcha::new(text_length, width, height, dark_mode);
-		
-		let duration = start.elapsed();
-		println!("Time elapsed in generating captcha() is: {:?}", duration);
-		
-		assert_eq!(captcha.text.len(), 5);
-		
-		let start_with = captcha.base_img.starts_with("data:image/png;base64,");
-		assert_eq!(start_with, true);
-		
-		println!("text: {}", captcha.text);
-		println!("base_img: {}", captcha.base_img);
-	}
+	use crate::{CaptchaBuilder};
 	
 	#[test]
 	fn it_generate_captcha_using_builder() {
@@ -174,10 +139,11 @@ mod tests {
 		
 		assert_eq!(captcha.text.len(), 5);
 		
-		let start_with = captcha.base_img.starts_with("data:image/png;base64,");
+		let base_img = captcha.to_base64();
+		let start_with = base_img.starts_with("data:image/jpeg;base64,");
 		assert_eq!(start_with, true);
 		
 		println!("text: {}", captcha.text);
-		println!("base_img: {}", captcha.base_img);
+		println!("base_img: {}", base_img);
 	}
 }
