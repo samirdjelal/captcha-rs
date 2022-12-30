@@ -57,7 +57,7 @@ fn main() {
 		.build();
 	
 	println!("text: {}", captcha.text);
-	println!("base_img: {}", captcha.base_img);
+	println!("base_img: {}", captcha.to_base64());
 	
 }
 ```
