@@ -36,7 +36,7 @@ impl Captcha {
 }
 
 pub struct CaptchaBuilder {
-	length: Option<usize>,
+	text: Option<String>,
 	width: Option<u32>,
 	height: Option<u32>,
 	dark_mode: Option<bool>,
@@ -46,7 +46,7 @@ pub struct CaptchaBuilder {
 impl CaptchaBuilder {
 	pub fn new() -> Self {
 		CaptchaBuilder {
-			length: None,
+			text: None,
 			width: None,
 			height: None,
 			dark_mode: None,
@@ -54,8 +54,15 @@ impl CaptchaBuilder {
 		}
 	}
 	
+	pub fn text(mut self, text: String) -> Self {
+		self.text = Some(text);
+		self
+	}
+	
 	pub fn length(mut self, length: usize) -> Self {
-		self.length = Some(length);
+		// Generate an array of captcha characters
+		let res = captcha::get_captcha(length);
+		self.text = Some(res.join(""));
 		self
 	}
 	
@@ -83,19 +90,16 @@ impl CaptchaBuilder {
 	}
 	
 	pub fn build(self) -> Captcha {
-		let length = self.length.unwrap_or(5);
+		let text = self.text.unwrap_or(captcha::get_captcha(5).join(""));
 		let width = self.width.unwrap_or(130);
 		let height = self.height.unwrap_or(40);
 		let dark_mode = self.dark_mode.unwrap_or(false);
 		let complexity = self.complexity.unwrap_or(1);
 		
-		// Generate an array of captcha characters
-		let res = captcha::get_captcha(length);
-		
-		let text = res.join("");
-		
 		// Create a white background image
 		let mut image = get_image(width, height, dark_mode);
+
+		let res: Vec<String> = text.chars().map(|x| x.to_string()).collect();
 		
 		// Loop to write the verification code string into the background image
 		cyclic_write_character(&res, &mut image, dark_mode);
@@ -108,8 +112,10 @@ impl CaptchaBuilder {
 		draw_interference_ellipse(2, &mut image, dark_mode);
 		draw_interference_ellipse(2, &mut image, dark_mode);
 		
-		gaussian_noise_mut(&mut image, (complexity.clone() - 1) as f64, ((10 * complexity.clone()) - 10) as f64, ((5 * complexity.clone()) - 5) as u64);
-		salt_and_pepper_noise_mut(&mut image, ((0.001 * complexity.clone() as f64) - 0.001) as f64, (0.5 * complexity.clone() as f64) as u64);
+		if complexity > 1 {
+			gaussian_noise_mut(&mut image, (complexity.clone() - 1) as f64, ((10 * complexity.clone()) - 10) as f64, ((5 * complexity.clone()) - 5) as u64);
+			salt_and_pepper_noise_mut(&mut image, ((0.001 * complexity.clone() as f64) - 0.001) as f64, (0.5 * complexity.clone() as f64) as u64);
+		}
 		
 		Captcha {
 			text,
@@ -121,10 +127,33 @@ impl CaptchaBuilder {
 
 #[cfg(test)]
 mod tests {
-	use crate::{CaptchaBuilder};
+	use crate::{Captcha, CaptchaBuilder};
 	
 	#[test]
-	fn it_generate_captcha_using_builder() {
+	fn it_generates_a_captcha() {
+		let dark_mode = false;
+		let text_length = 5;
+		let width = 130;
+		let height = 40;
+		
+		let start = std::time::Instant::now();
+		
+		let captcha = Captcha::new(text_length, width, height, dark_mode);
+		
+		let duration = start.elapsed();
+		println!("Time elapsed in generating captcha() is: {:?}", duration);
+		
+		assert_eq!(captcha.text.len(), 5);
+		
+		let start_with = captcha.base_img.starts_with("data:image/png;base64,");
+		assert_eq!(start_with, true);
+		
+		println!("text: {}", captcha.text);
+		// println!("base_img: {}", captcha.base_img);
+	}
+	
+	#[test]
+	fn it_generates_captcha_using_builder() {
 		let start = std::time::Instant::now();
 		let captcha = CaptchaBuilder::new()
 			.length(5)
