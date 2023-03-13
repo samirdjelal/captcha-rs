@@ -1,5 +1,5 @@
 use image::DynamicImage;
-use image::ImageOutputFormat::Png;
+use image::ImageOutputFormat::Jpeg;
 use image::{ImageBuffer, Rgb};
 use imageproc::drawing::{draw_cubic_bezier_curve_mut, draw_hollow_ellipse_mut, draw_text_mut};
 use rand::{thread_rng, Rng};
@@ -175,29 +175,12 @@ pub fn draw_interference_ellipse(
 }
 
 /**
- * Convert image to base 64 string
+ * Convert image to JPEG base64 string
  * parma image - Image
  */
-pub fn to_base64_str(image: ImageBuffer<Rgb<u8>, Vec<u8>>) -> String {
-	let base_img = DynamicImage::ImageRgb8(image);
+pub fn to_base64_str(image: &DynamicImage) -> String {
 	let mut buf = vec![];
-	base_img.write_to(&mut buf, Png).unwrap();
+	image.write_to(&mut buf, Jpeg(40)).unwrap();
 	let res_base64 = base64::encode(&buf);
-	format!("data:image/png;base64,{}", res_base64)
-}
-
-/**
- * Generate image verification code
- */
-pub fn get_captcha_img(res: Vec<String>, width: u32, height: u32, dark_mode: bool) -> String {
-	// Create a white background image
-	let mut image = get_image(width, height, dark_mode);
-	// Loop to write the verification code string into the background image
-	cyclic_write_character(&res, &mut image, dark_mode);
-	// Draw interference lines
-	draw_interference_line(&mut image, dark_mode);
-	// Draw a distraction circle
-	draw_interference_ellipse(2, &mut image, dark_mode);
-	// Convert to base 64 string
-	to_base64_str(image)
+	format!("data:image/jpeg;base64,{}", res_base64)
 }
