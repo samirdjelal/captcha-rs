@@ -18,7 +18,7 @@ Example pictures are as follows:
 
 ### Using complexity method
 
-Complexity | Dark Mode / Noise Filter | Light Mode / Noise Filter
+Complexity | Light Mode / Noise Filter | Dark Mode / Noise Filter
 --- | --- | ---
 Level 1 | ![img-dark](images/img-light-complexity-1.png) | ![img-light](images/img-dark-complexity-1.png)
 Level 2 | ![img-dark](images/img-light-complexity-2.png) | ![img-light](images/img-dark-complexity-2.png)
