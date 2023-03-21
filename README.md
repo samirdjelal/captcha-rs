@@ -1,12 +1,12 @@
 # captcha-rs
 
-[![Captcha-rs crate](https://img.shields.io/crates/v/captcha-rs.svg)](https://crates.io/crates/captcha-rs)
-[![test](https://github.com/samirdjelal/captcha-rs/actions/workflows/test.yml/badge.svg)](https://github.com/samirdjelal/captcha-rs/actions/workflows/test.yml)
-[![issues](https://img.shields.io/github/issues/samirdjelal/captcha-rs?color=%23ffc107)](https://github.com/samirdjelal/captcha-rs/issues)
-[![Downloads](https://img.shields.io/crates/d/captcha-rs)](https://crates.io/crates/captcha-rs)
-[![MIT License](https://img.shields.io/crates/l/captcha-rs)](LICENSE)
-[![Captcha-rs documentation](https://img.shields.io/docsrs/captcha-rs)](https://docs.rs/captcha-rs)
-[![dependency status](https://deps.rs/repo/github/samirdjelal/captcha-rs/status.svg)](https://deps.rs/repo/github/samirdjelal/captcha-rs)
+[![Captcha-rs crate](https://img.shields.io/crates/v/captcha-rs.svg?style=flat&logo=appveyor)](https://crates.io/crates/captcha-rs)
+[![test](https://github.com/samirdjelal/captcha-rs/actions/workflows/test.yml/badge.svg?style=flat&logo=appveyor)](https://github.com/samirdjelal/captcha-rs/actions/workflows/test.yml)
+[![issues](https://img.shields.io/github/issues/samirdjelal/captcha-rs?color=%23ffc107&style=flat&logo=appveyor)](https://github.com/samirdjelal/captcha-rs/issues)
+[![Downloads](https://img.shields.io/crates/d/captcha-rs?style=flat&logo=appveyor)](https://crates.io/crates/captcha-rs)
+[![MIT License](https://img.shields.io/crates/l/captcha-rs?style=flat&logo=appveyor)](LICENSE)
+[![Captcha-rs documentation](https://img.shields.io/docsrs/captcha-rs?style=flat&logo=appveyor)](https://docs.rs/captcha-rs)
+[![dependency status](https://deps.rs/repo/github/samirdjelal/captcha-rs/status.svg?style=flat&logo=appveyor)](https://deps.rs/repo/github/samirdjelal/captcha-rs)
 
 **captcha-rs** is a library that generate verification images dynamically.
 
