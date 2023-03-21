@@ -18,18 +18,18 @@ Example pictures are as follows:
 
 ### Using complexity method
 
-Complexity | Light Mode / Noise Filter | Dark Mode / Noise Filter
---- | --- | ---
-Level 1 | ![img-dark](images/img-light-complexity-1.png) | ![img-light](images/img-dark-complexity-1.png)
-Level 2 | ![img-dark](images/img-light-complexity-2.png) | ![img-light](images/img-dark-complexity-2.png)
-Level 3 | ![img-dark](images/img-light-complexity-3.png) | ![img-light](images/img-dark-complexity-3.png)
-Level 4 | ![img-dark](images/img-light-complexity-4.png) | ![img-light](images/img-dark-complexity-4.png)
-Level 5 | ![img-dark](images/img-light-complexity-5.png) | ![img-light](images/img-dark-complexity-5.png)
-Level 6 | ![img-dark](images/img-light-complexity-6.png) | ![img-light](images/img-dark-complexity-6.png)
-Level 7 | ![img-dark](images/img-light-complexity-7.png) | ![img-light](images/img-dark-complexity-7.png)
-Level 8 | ![img-dark](images/img-light-complexity-8.png) | ![img-light](images/img-dark-complexity-8.png)
-Level 9 | ![img-dark](images/img-light-complexity-9.png) | ![img-light](images/img-dark-complexity-9.png)
-Level 10 | ![img-dark](images/img-light-complexity-10.png) | ![img-light](images/img-dark-complexity-10.png)
+Complexity | Light Mode / Noise Filter                        | Dark Mode / Noise Filter
+--- |--------------------------------------------------| ---
+Level 1 | ![img-light](images/img-light-complexity-1.png)  | ![img-dark](images/img-dark-complexity-1.png)
+Level 2 | ![img-light](images/img-light-complexity-2.png)  | ![img-dark](images/img-dark-complexity-2.png)
+Level 3 | ![img-light](images/img-light-complexity-3.png)  | ![img-dark](images/img-dark-complexity-3.png)
+Level 4 | ![img-light](images/img-light-complexity-4.png)  | ![img-dark](images/img-dark-complexity-4.png)
+Level 5 | ![img-light](images/img-light-complexity-5.png)  | ![img-dark](images/img-dark-complexity-5.png)
+Level 6 | ![img-light](images/img-light-complexity-6.png)  | ![img-dark](images/img-dark-complexity-6.png)
+Level 7 | ![img-light](images/img-light-complexity-7.png)  | ![img-dark](images/img-dark-complexity-7.png)
+Level 8 | ![img-light](images/img-light-complexity-8.png)  | ![img-dark](images/img-dark-complexity-8.png)
+Level 9 | ![img-light](images/img-light-complexity-9.png)  | ![img-dark](images/img-dark-complexity-9.png)
+Level 10 | ![img-light](images/img-light-complexity-10.png) | ![img-dark](images/img-dark-complexity-10.png)
 
 
 ## Example
@@ -38,7 +38,7 @@ Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.2.6"
+captcha-rs = "0.2.8"
 ```
 
 And then get started in your `main.rs`:
@@ -54,6 +54,7 @@ fn main() {
 		.height(40)
 		.dark_mode(false)
 		.complexity(1) // min: 1, max: 10
+		.compression(40) // min: 1, max: 99
 		.build();
 	
 	println!("text: {}", captcha.text);

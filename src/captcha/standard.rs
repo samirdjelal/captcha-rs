@@ -1,8 +1,11 @@
+use std::io::Cursor;
+use base64::Engine;
+use base64::engine::general_purpose;
+use image::{ImageBuffer, Rgb};
 use image::DynamicImage;
 use image::ImageOutputFormat::Jpeg;
-use image::{ImageBuffer, Rgb};
 use imageproc::drawing::{draw_cubic_bezier_curve_mut, draw_hollow_ellipse_mut, draw_text_mut};
-use rand::{thread_rng, Rng};
+use rand::{Rng, thread_rng};
 use rusttype::{Font, Scale};
 
 // Define the verification code characters.
@@ -123,7 +126,7 @@ pub fn cyclic_write_character(
 	for (i, _) in res.iter().enumerate() {
 		let text = &res[i];
 		
-		draw_text_mut(image, get_color(dark_mode), 5 + (i as u32 * c), y, scale, &get_font(), text);
+		draw_text_mut(image, get_color(dark_mode), 5 + (i as u32 * c) as i32, y as i32, scale, &get_font(), text);
 	}
 }
 
@@ -178,9 +181,9 @@ pub fn draw_interference_ellipse(
  * Convert image to JPEG base64 string
  * parma image - Image
  */
-pub fn to_base64_str(image: &DynamicImage) -> String {
-	let mut buf = vec![];
-	image.write_to(&mut buf, Jpeg(40)).unwrap();
-	let res_base64 = base64::encode(&buf);
+pub fn to_base64_str(image: &DynamicImage, compression: u8) -> String {
+	let mut buf = Cursor::new(Vec::new());
+	image.write_to(&mut buf, Jpeg(compression)).unwrap();
+	let res_base64 = general_purpose::STANDARD.encode(buf.into_inner());
 	format!("data:image/jpeg;base64,{}", res_base64)
 }
