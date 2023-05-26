@@ -106,6 +106,7 @@ impl CaptchaBuilder {
 		let height = self.height.unwrap_or(40);
 		let dark_mode = self.dark_mode.unwrap_or(false);
 		let complexity = self.complexity.unwrap_or(1);
+		let compression = self.compression.unwrap_or(40);
 		
 		// Create a white background image
 		let mut image = get_image(width, height, dark_mode);
@@ -131,7 +132,7 @@ impl CaptchaBuilder {
 		Captcha {
 			text,
 			image: DynamicImage::ImageRgb8(image),
-			compression: 40,
+			compression,
 			dark_mode,
 		}
 	}
