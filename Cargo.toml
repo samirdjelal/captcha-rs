@@ -1,6 +1,6 @@
 [package]
 name = "captcha-rs"
-version = "0.2.9"
+version = "0.2.10"
 edition = "2021"
 authors = ["Samir Djelal <ssdjelal@gmail.com>"]
 readme = "README.md"
