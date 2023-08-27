@@ -20,6 +20,7 @@
 //! ```
 use image::DynamicImage;
 use imageproc::noise::{gaussian_noise_mut, salt_and_pepper_noise_mut};
+use rand::Rng;
 
 use crate::captcha::{cyclic_write_character, draw_interference_ellipse, draw_interference_line, get_image, to_base64_str};
 
@@ -125,8 +126,9 @@ impl CaptchaBuilder {
 		draw_interference_ellipse(2, &mut image, dark_mode);
 		
 		if complexity > 1 {
-			gaussian_noise_mut(&mut image, (complexity - 1) as f64, ((5 * complexity) - 5) as f64, ((5 * complexity) - 5) as u64);
-			salt_and_pepper_noise_mut(&mut image, (0.002 * complexity as f64) - 0.002, (0.5 * complexity as f64) as u64);
+			let mut rng = rand::thread_rng();
+			gaussian_noise_mut(&mut image, (complexity - 1) as f64, ((5 * complexity) - 5) as f64, rng.gen());
+			salt_and_pepper_noise_mut(&mut image, (0.002 * complexity as f64) - 0.002, rng.gen());
 		}
 		
 		Captcha {
