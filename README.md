@@ -54,7 +54,6 @@ fn main() {
 		.height(40)
 		.dark_mode(false)
 		.complexity(1) // min: 1, max: 10
-		.compression(40) // min: 1, max: 99
 		.build();
 	
 	println!("text: {}", captcha.text);
