@@ -38,7 +38,7 @@ Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.2.11"
+captcha-rs = "0.2.12"
 ```
 
 And then get started in your `main.rs`:
@@ -49,7 +49,7 @@ use captcha_rs::CaptchaBuilder;
 fn main() {
 	
 	let captcha = CaptchaBuilder::new()
-		.length(5)
+		.length(5) // min: 1, max: 16
 		.width(130)
 		.height(40)
 		.dark_mode(false)
