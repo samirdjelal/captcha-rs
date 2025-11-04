@@ -126,16 +126,16 @@ impl CaptchaBuilder {
         draw_interference_ellipse(2, &mut image, dark_mode);
 
         if complexity > 1 {
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
 
             gaussian_noise_mut(
                 &mut image,
                 (complexity - 1) as f64,
                 ((5 * complexity) - 5) as f64,
-                rng.gen(),
+                rng.random(),
             );
 
-            salt_and_pepper_noise_mut(&mut image, (0.002 * complexity as f64) - 0.002, rng.gen());
+            salt_and_pepper_noise_mut(&mut image, (0.002 * complexity as f64) - 0.002, rng.random());
         }
 
         Captcha {

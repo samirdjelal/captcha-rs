@@ -4,8 +4,8 @@ use image::DynamicImage;
 use image::ImageFormat::Jpeg;
 use image::{ImageBuffer, Rgb};
 use imageproc::drawing::{draw_cubic_bezier_curve_mut, draw_hollow_ellipse_mut, draw_text_mut};
-use rand::{thread_rng, Rng};
 use rusttype::{Font, Scale};
+use rand::{rng, Rng};
 use std::io::Cursor;
 
 // Define the verification code characters.
@@ -47,8 +47,8 @@ pub const SCALE_LG: Scale = Scale { x: 53.0, y: 50.0 };
  * params num - maximum random number
  */
 pub fn get_rnd(num: usize) -> usize {
-    let mut rng = thread_rng();
-    rng.gen_range(0..=num)
+    let mut rng = rng();
+    rng.random_range(0..=num)
 }
 
 /**
