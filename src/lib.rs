@@ -11,6 +11,7 @@
 //!     .height(40)
 //!     .dark_mode(false)
 //!     .complexity(1) // min: 1, max: 10
+//!     .compression(40) // min: 1, max: 99
 //!     .build();
 //!
 //! println!("text: {}", captcha.text);
@@ -30,13 +31,14 @@ mod captcha;
 
 pub struct Captcha {
     pub text: String,
-    pub image: DynamicImage,
+    pub image: DynamicImage, // DynamicImage::ImageRgb8
+    pub compression: u8,
     pub dark_mode: bool,
 }
 
 impl Captcha {
     pub fn to_base64(&self) -> String {
-        to_base64_str(&self.image)
+        to_base64_str(&self.image, self.compression)
     }
 }
 
@@ -47,6 +49,7 @@ pub struct CaptchaBuilder {
     height: Option<u32>,
     dark_mode: Option<bool>,
     complexity: Option<u32>,
+    compression: Option<u8>,
 }
 
 impl CaptchaBuilder {
@@ -57,6 +60,7 @@ impl CaptchaBuilder {
             height: None,
             dark_mode: None,
             complexity: None,
+            compression: Some(40),
         }
     }
 
@@ -102,12 +106,18 @@ impl CaptchaBuilder {
         self
     }
 
+    pub fn compression(mut self, compression: u8) -> Self {
+        self.compression = Some(compression);
+        self
+    }
+
     pub fn build(self) -> Captcha {
         let text = self.text.unwrap_or(captcha::get_captcha(5).join(""));
         let width = self.width.unwrap_or(130);
         let height = self.height.unwrap_or(40);
         let dark_mode = self.dark_mode.unwrap_or(false);
         let complexity = self.complexity.unwrap_or(1);
+        let compression = self.compression.unwrap_or(40);
 
         // Create a white background image
         let mut image = get_image(width, height, dark_mode);
@@ -141,6 +151,7 @@ impl CaptchaBuilder {
         Captcha {
             text,
             image: DynamicImage::ImageRgb8(image),
+            compression,
             dark_mode,
         }
     }
@@ -185,6 +196,7 @@ mod tests {
             .height(70)
             .dark_mode(false)
             .complexity(5)
+            .compression(40)
             .build();
 
         let duration = start.elapsed();
