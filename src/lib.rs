@@ -40,7 +40,7 @@ impl Captcha {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct CaptchaBuilder {
     text: Option<String>,
     width: Option<u32>,
