@@ -4,8 +4,8 @@ use image::DynamicImage;
 use image::ImageFormat::Jpeg;
 use image::{ImageBuffer, Rgb};
 use imageproc::drawing::{draw_cubic_bezier_curve_mut, draw_hollow_ellipse_mut, draw_text_mut};
-use rusttype::{Font, Scale};
 use rand::{rng, Rng};
+use ab_glyph::{FontVec, PxScale};
 use std::io::Cursor;
 
 // Define the verification code characters.
@@ -38,9 +38,9 @@ pub const LIGHT: [u8; 3] = [224, 238, 253];
 pub const DARK: [u8; 3] = [18, 18, 18];
 
 // Define font size
-pub const SCALE_SM: Scale = Scale { x: 38.0, y: 35.0 };
-pub const SCALE_MD: Scale = Scale { x: 45.0, y: 42.0 };
-pub const SCALE_LG: Scale = Scale { x: 53.0, y: 50.0 };
+pub const SCALE_SM: PxScale = PxScale { x: 38.0, y: 35.0 };
+pub const SCALE_MD: PxScale = PxScale { x: 45.0, y: 42.0 };
+pub const SCALE_LG: PxScale = PxScale { x: 53.0, y: 50.0 };
 
 /***
  * Generate random numbers
@@ -88,9 +88,9 @@ pub fn get_next(min: f32, max: u32) -> f32 {
 /**
  * Get font
  */
-pub fn get_font() -> Font<'static> {
+pub fn get_font() -> FontVec {
     let font = Vec::from(include_bytes!("../../fonts/arial.ttf") as &[u8]);
-    Font::try_from_vec(font).unwrap()
+    FontVec::try_from_vec(font).unwrap()
 }
 
 /**
