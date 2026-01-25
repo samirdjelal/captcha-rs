@@ -1,11 +1,11 @@
 use base64::engine::general_purpose;
 use base64::Engine;
 use image::DynamicImage;
-use image::ImageOutputFormat::Jpeg;
+use image::codecs::jpeg::JpegEncoder;
 use image::{ImageBuffer, Rgb};
 use imageproc::drawing::{draw_cubic_bezier_curve_mut, draw_hollow_ellipse_mut, draw_text_mut};
-use rand::{thread_rng, Rng};
-use rusttype::{Font, Scale};
+use ab_glyph::FontArc;
+use rand::{rng, Rng};
 use std::io::Cursor;
 
 // Define the verification code characters.
@@ -38,17 +38,17 @@ pub const LIGHT: [u8; 3] = [224, 238, 253];
 pub const DARK: [u8; 3] = [18, 18, 18];
 
 // Define font size
-pub const SCALE_SM: Scale = Scale { x: 38.0, y: 35.0 };
-pub const SCALE_MD: Scale = Scale { x: 45.0, y: 42.0 };
-pub const SCALE_LG: Scale = Scale { x: 53.0, y: 50.0 };
+pub const SCALE_SM: f32 = 35.0;
+pub const SCALE_MD: f32 = 42.0;
+pub const SCALE_LG: f32 = 50.0;
 
 /***
  * Generate random numbers
  * params num - maximum random number
  */
 pub fn get_rnd(num: usize) -> usize {
-    let mut rng = thread_rng();
-    rng.gen_range(0..=num)
+    let mut rng = rng();
+    rng.random_range(0..=num)
 }
 
 /**
@@ -82,15 +82,18 @@ pub fn get_color(dark_mode: bool) -> Rgb<u8> {
  * return: random number
  */
 pub fn get_next(min: f32, max: u32) -> f32 {
+    if (max as f32) <= min {
+        return min;
+    }
     min + get_rnd(max as usize - min as usize) as f32
 }
 
 /**
  * Get font
  */
-pub fn get_font() -> Font<'static> {
+pub fn get_font() -> FontArc {
     let font = Vec::from(include_bytes!("../../fonts/arial.ttf") as &[u8]);
-    Font::try_from_vec(font).unwrap()
+    FontArc::try_from_vec(font).unwrap()
 }
 
 /**
@@ -115,8 +118,12 @@ pub fn cyclic_write_character(
     image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     dark_mode: bool,
 ) {
-    let c = (image.width() - 10) / res.len() as u32;
-    let y = image.height() / 2 - 15;
+    if res.is_empty() {
+        return;
+    }
+    let usable_width = image.width().saturating_sub(10);
+    let c = usable_width / res.len() as u32;
+    let y = (image.height() / 2).saturating_sub(15);
 
     let scale = match res.len() {
         1..=3 => SCALE_LG,
@@ -146,11 +153,14 @@ pub fn cyclic_write_character(
 pub fn draw_interference_line(image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, dark_mode: bool) {
     let width = image.width();
     let height = image.height();
+    if width <= 5 || height <= 5 {
+        return;
+    }
     let x1: f32 = 5.0;
     let y1 = get_next(x1, height / 2);
 
-    let x2 = (width - 5) as f32;
-    let y2 = get_next((height / 2) as f32, height - 5);
+    let x2 = width.saturating_sub(5) as f32;
+    let y2 = get_next((height / 2) as f32, height.saturating_sub(5));
 
     let ctrl_x = get_next((width / 4) as f32, width / 4 * 3);
     let ctrl_y = get_next(x1, height - 5);
@@ -179,6 +189,9 @@ pub fn draw_interference_ellipse(
     image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     dark_mode: bool,
 ) {
+    if image.width() <= 25 || image.height() <= 15 {
+        return;
+    }
     for _ in 0..num {
         let w = (10 + get_rnd(5)) as i32;
         let x = get_rnd((image.width() - 25) as usize) as i32;
@@ -193,7 +206,10 @@ pub fn draw_interference_ellipse(
  */
 pub fn to_base64_str(image: &DynamicImage, compression: u8) -> String {
     let mut buf = Cursor::new(Vec::new());
-    image.write_to(&mut buf, Jpeg(compression)).unwrap();
+    let mut encoder = JpegEncoder::new_with_quality(&mut buf, compression);
+    if encoder.encode_image(image).is_err() {
+        return "data:image/jpeg;base64,".to_string();
+    }
     let res_base64 = general_purpose::STANDARD.encode(buf.into_inner());
     format!("data:image/jpeg;base64,{}", res_base64)
 }

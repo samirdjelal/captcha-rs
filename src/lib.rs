@@ -20,7 +20,7 @@
 //! ```
 use image::DynamicImage;
 use imageproc::noise::{gaussian_noise_mut, salt_and_pepper_noise_mut};
-use rand::Rng;
+use rand::{rng, Rng};
 
 use crate::captcha::{
     cyclic_write_character, draw_interference_ellipse, draw_interference_line, get_image,
@@ -71,6 +71,7 @@ impl CaptchaBuilder {
 
     pub fn length(mut self, length: usize) -> Self {
         // Generate an array of captcha characters
+        let length = length.max(1);
         let res = captcha::get_captcha(length);
         self.text = Some(res.join(""));
         self
@@ -107,17 +108,22 @@ impl CaptchaBuilder {
     }
 
     pub fn compression(mut self, compression: u8) -> Self {
+        let compression = compression.clamp(1, 99);
         self.compression = Some(compression);
         self
     }
 
     pub fn build(self) -> Captcha {
-        let text = self.text.unwrap_or(captcha::get_captcha(5).join(""));
-        let width = self.width.unwrap_or(130);
-        let height = self.height.unwrap_or(40);
+        let text = match self.text {
+            Some(text) if !text.is_empty() => text,
+            _ => captcha::get_captcha(5).join(""),
+        };
+
+        let width = self.width.unwrap_or(130).clamp(30, 2000);
+        let height = self.height.unwrap_or(40).clamp(20, 2000);
         let dark_mode = self.dark_mode.unwrap_or(false);
         let complexity = self.complexity.unwrap_or(1);
-        let compression = self.compression.unwrap_or(40);
+        let compression = self.compression.unwrap_or(40).clamp(1, 99);
 
         // Create a white background image
         let mut image = get_image(width, height, dark_mode);
@@ -136,16 +142,20 @@ impl CaptchaBuilder {
         draw_interference_ellipse(2, &mut image, dark_mode);
 
         if complexity > 1 {
-            let mut rng = rand::thread_rng();
+            let mut rng = rng();
 
             gaussian_noise_mut(
                 &mut image,
                 (complexity - 1) as f64,
                 ((5 * complexity) - 5) as f64,
-                rng.gen(),
+                rng.random::<u64>(),
             );
 
-            salt_and_pepper_noise_mut(&mut image, (0.002 * complexity as f64) - 0.002, rng.gen());
+            salt_and_pepper_noise_mut(
+                &mut image,
+                (0.002 * complexity as f64) - 0.002,
+                rng.random::<u64>(),
+            );
         }
 
         Captcha {
@@ -207,5 +217,19 @@ mod tests {
         assert!(base_img.starts_with("data:image/jpeg;base64,"));
         println!("text: {}", captcha.text);
         println!("base_img: {}", base_img);
+    }
+
+    #[test]
+    fn it_handles_empty_text_and_small_dimensions() {
+        let captcha = CaptchaBuilder::new()
+            .text(String::new())
+            .width(10)
+            .height(10)
+            .compression(0)
+            .build();
+
+        assert!(!captcha.text.is_empty());
+        let base_img = captcha.to_base64();
+        assert!(base_img.starts_with("data:image/jpeg;base64,"));
     }
 }
