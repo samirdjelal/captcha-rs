@@ -48,7 +48,7 @@ Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.4.0"
+captcha-rs = "0.4.1"
 ```
 
 And then get started in your `main.rs`:
@@ -63,6 +63,7 @@ fn main() {
 		.width(130)
 		.height(40)
 		.dark_mode(false)
+		.chars(vec!['A', 'B', 'C', 'D']) // Optional custom characters
 		.complexity(1) // min: 1, max: 10
 		.compression(40) // min: 1, max: 99
 		.drop_shadow(false) // Adds a drop shadow to the text

@@ -44,7 +44,9 @@ impl Captcha {
 
 #[derive(Default)]
 pub struct CaptchaBuilder {
-    text: String,
+    text: Option<String>,
+    length: usize,
+    characters: Vec<char>,
     width: u32,
     height: u32,
     dark_mode: bool,
@@ -59,7 +61,9 @@ pub struct CaptchaBuilder {
 impl CaptchaBuilder {
     pub fn new() -> Self {
         CaptchaBuilder {
-            text: captcha::get_captcha(5).join(""),
+            text: None,
+            length: 5,
+            characters: captcha::BASIC_CHAR.to_vec(),
             width: 130,
             height: 40,
             dark_mode: false,
@@ -73,15 +77,17 @@ impl CaptchaBuilder {
     }
 
     pub fn text(mut self, text: String) -> Self {
-        self.text = text;
+        self.text = Some(text);
         self
     }
 
     pub fn length(mut self, length: usize) -> Self {
-        // Generate an array of captcha characters
-        let length = length.max(1);
-        let res = captcha::get_captcha(length);
-        self.text = res.join("");
+        self.length = length.max(1);
+        self
+    }
+
+    pub fn chars(mut self, chars: Vec<char>) -> Self {
+        self.characters = chars;
         self
     }
 
@@ -131,10 +137,9 @@ impl CaptchaBuilder {
     }
 
     pub fn build(self) -> Captcha {
-        let text = if self.text.is_empty() {
-            captcha::get_captcha(5).join("")
-        } else {
-            self.text.clone()
+        let text = match self.text {
+            Some(t) if !t.is_empty() => t,
+            _ => captcha::get_captcha(self.length, &self.characters).join(""),
         };
 
         // Create a background image
@@ -275,6 +280,21 @@ mod tests {
             .build();
 
         assert_eq!(captcha.text, "shadow");
+        let base_img = captcha.to_base64();
+        assert!(base_img.starts_with("data:image/jpeg;base64,"));
+    }
+
+    #[test]
+    fn it_generates_captcha_with_custom_characters() {
+        let captcha = CaptchaBuilder::new()
+            .chars(vec!['A', 'B'])
+            .length(10)
+            .width(200)
+            .height(70)
+            .build();
+
+        assert_eq!(captcha.text.len(), 10);
+        assert!(captcha.text.chars().all(|c| c == 'A' || c == 'B'));
         let base_img = captcha.to_base64();
         assert!(base_img.starts_with("data:image/jpeg;base64,"));
     }

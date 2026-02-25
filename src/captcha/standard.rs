@@ -68,14 +68,16 @@ pub fn get_next(min: f32, max: u32) -> f32 {
 // CAPTCHA GENERATION & CONFIGURATION
 // ==========================================
 
-/// Generate an array of captcha characters.
+/// Generate an array of captcha characters from the given character set.
 /// 
 /// `num` specifies the number of digits/characters in the verification code.
-pub fn get_captcha(num: usize) -> Vec<String> {
+pub fn get_captcha(num: usize, chars: &[char]) -> Vec<String> {
     let mut res = vec![];
+    let chars = if chars.is_empty() { &BASIC_CHAR } else { chars };
+    let max_idx = chars.len() - 1;
     for _ in 0..num {
-        let rnd = get_rnd(53);
-        res.push(BASIC_CHAR[rnd].to_string())
+        let rnd = get_rnd(max_idx);
+        res.push(chars[rnd].to_string())
     }
     res
 }
