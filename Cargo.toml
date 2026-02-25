@@ -21,3 +21,10 @@ image = { version = "0.25.9", default-features = false, features = ["jpeg"] }
 base64 = "0.22.1"
 imageproc = "0.26.0"
 ab_glyph = "0.2.32"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "captcha_bench"
+harness = false
