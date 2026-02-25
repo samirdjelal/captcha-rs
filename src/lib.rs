@@ -44,28 +44,36 @@ impl Captcha {
 
 #[derive(Default)]
 pub struct CaptchaBuilder {
-    text: Option<String>,
-    width: Option<u32>,
-    height: Option<u32>,
-    dark_mode: Option<bool>,
-    complexity: Option<u32>,
-    compression: Option<u8>,
+    text: String,
+    width: u32,
+    height: u32,
+    dark_mode: bool,
+    complexity: u32,
+    compression: u8,
+    drop_shadow: bool,
+    interference_lines: usize,
+    interference_ellipses: usize,
+    distortion: u32,
 }
 
 impl CaptchaBuilder {
     pub fn new() -> Self {
         CaptchaBuilder {
-            text: None,
-            width: None,
-            height: None,
-            dark_mode: None,
-            complexity: None,
-            compression: Some(40),
+            text: captcha::get_captcha(5).join(""),
+            width: 130,
+            height: 40,
+            dark_mode: false,
+            complexity: 1,
+            compression: 40,
+            drop_shadow: false,
+            interference_lines: 2,
+            interference_ellipses: 2,
+            distortion: 0,
         }
     }
 
     pub fn text(mut self, text: String) -> Self {
-        self.text = Some(text);
+        self.text = text;
         self
     }
 
@@ -73,87 +81,95 @@ impl CaptchaBuilder {
         // Generate an array of captcha characters
         let length = length.max(1);
         let res = captcha::get_captcha(length);
-        self.text = Some(res.join(""));
+        self.text = res.join("");
         self
     }
 
     pub fn width(mut self, width: u32) -> Self {
-        self.width = Some(width);
+        self.width = width.clamp(30, 2000);
         self
     }
 
     pub fn height(mut self, height: u32) -> Self {
-        self.height = Some(height);
+        self.height = height.clamp(20, 2000);
         self
     }
 
     pub fn dark_mode(mut self, dark_mode: bool) -> Self {
-        self.dark_mode = Some(dark_mode);
+        self.dark_mode = dark_mode;
         self
     }
 
     pub fn complexity(mut self, complexity: u32) -> Self {
-        let mut complexity = complexity;
-
-        if complexity > 10 {
-            complexity = 10;
-        }
-
-        if complexity < 1 {
-            complexity = 1;
-        }
-
-        self.complexity = Some(complexity);
+        self.complexity = complexity.clamp(1, 10);
         self
     }
 
     pub fn compression(mut self, compression: u8) -> Self {
-        let compression = compression.clamp(1, 99);
-        self.compression = Some(compression);
+        self.compression = compression.clamp(1, 99);
+        self
+    }
+
+    pub fn drop_shadow(mut self, drop_shadow: bool) -> Self {
+        self.drop_shadow = drop_shadow;
+        self
+    }
+
+    pub fn interference_lines(mut self, lines: usize) -> Self {
+        self.interference_lines = lines;
+        self
+    }
+
+    pub fn interference_ellipses(mut self, ellipses: usize) -> Self {
+        self.interference_ellipses = ellipses;
+        self
+    }
+
+    pub fn distortion(mut self, distortion: u32) -> Self {
+        self.distortion = distortion;
         self
     }
 
     pub fn build(self) -> Captcha {
-        let text = match self.text {
-            Some(text) if !text.is_empty() => text,
-            _ => captcha::get_captcha(5).join(""),
+        let text = if self.text.is_empty() {
+            captcha::get_captcha(5).join("")
+        } else {
+            self.text.clone()
         };
 
-        let width = self.width.unwrap_or(130).clamp(30, 2000);
-        let height = self.height.unwrap_or(40).clamp(20, 2000);
-        let dark_mode = self.dark_mode.unwrap_or(false);
-        let complexity = self.complexity.unwrap_or(1);
-        let compression = self.compression.unwrap_or(40).clamp(1, 99);
-
-        // Create a white background image
-        let mut image = get_image(width, height, dark_mode);
+        // Create a background image
+        let mut image = get_image(self.width, self.height, self.dark_mode);
 
         let res: Vec<String> = text.chars().map(|x| x.to_string()).collect();
 
         // Loop to write the verification code string into the background image
-        cyclic_write_character(&res, &mut image, dark_mode);
+        cyclic_write_character(&res, &mut image, self.dark_mode, self.drop_shadow);
+
+        if self.distortion > 0 {
+            captcha::apply_wavy_distortion(&mut image, self.distortion);
+        }
 
         // Draw interference lines
-        draw_interference_line(&mut image, dark_mode);
-        draw_interference_line(&mut image, dark_mode);
+        for _ in 0..self.interference_lines {
+            draw_interference_line(&mut image, self.dark_mode);
+        }
 
-        // Draw a distraction circle
-        draw_interference_ellipse(2, &mut image, dark_mode);
-        draw_interference_ellipse(2, &mut image, dark_mode);
+        // Draw distraction circles
+        draw_interference_ellipse(self.interference_ellipses, &mut image, self.dark_mode);
 
-        if complexity > 1 {
+        if self.complexity > 1 {
             let mut rng = rng();
 
             gaussian_noise_mut(
                 &mut image,
-                (complexity - 1) as f64,
-                ((5 * complexity) - 5) as f64,
+                (self.complexity - 1) as f64,
+                ((5 * self.complexity) - 5) as f64,
                 rng.random::<u64>(),
             );
 
             salt_and_pepper_noise_mut(
                 &mut image,
-                (0.002 * complexity as f64) - 0.002,
+                (0.002 * self.complexity as f64) - 0.002,
                 rng.random::<u64>(),
             );
         }
@@ -161,8 +177,8 @@ impl CaptchaBuilder {
         Captcha {
             text,
             image: DynamicImage::ImageRgb8(image),
-            compression,
-            dark_mode,
+            compression: self.compression,
+            dark_mode: self.dark_mode,
         }
     }
 }
@@ -229,6 +245,36 @@ mod tests {
             .build();
 
         assert!(!captcha.text.is_empty());
+        let base_img = captcha.to_base64();
+        assert!(base_img.starts_with("data:image/jpeg;base64,"));
+    }
+
+    #[test]
+    fn it_generates_captcha_with_distortion() {
+        let captcha = CaptchaBuilder::new()
+            .text(String::from("wavy"))
+            .width(200)
+            .height(70)
+            .distortion(5)
+            .build();
+
+        assert_eq!(captcha.text, "wavy");
+        let base_img = captcha.to_base64();
+        assert!(base_img.starts_with("data:image/jpeg;base64,"));
+    }
+
+    #[test]
+    fn it_generates_captcha_with_custom_interference_and_shadow() {
+        let captcha = CaptchaBuilder::new()
+            .text(String::from("shadow"))
+            .width(200)
+            .height(70)
+            .drop_shadow(true)
+            .interference_lines(5)
+            .interference_ellipses(5)
+            .build();
+
+        assert_eq!(captcha.text, "shadow");
         let base_img = captcha.to_base64();
         assert!(base_img.starts_with("data:image/jpeg;base64,"));
     }

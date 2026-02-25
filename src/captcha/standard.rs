@@ -1,22 +1,29 @@
+use ab_glyph::FontArc;
 use base64::engine::general_purpose;
 use base64::Engine;
-use image::DynamicImage;
 use image::codecs::jpeg::JpegEncoder;
-use image::{ImageBuffer, Rgb};
+use image::{DynamicImage, ImageBuffer, Rgb};
 use imageproc::drawing::{draw_cubic_bezier_curve_mut, draw_hollow_ellipse_mut, draw_text_mut};
-use ab_glyph::FontArc;
 use rand::{rng, Rng};
 use std::io::Cursor;
 
-// Define the verification code characters.
-// Remove 0, O, I, L and other easily confusing letters
+// ==========================================
+// CONSTANTS
+// ==========================================
+
+/// Define the verification code characters.
+/// Remove 0, O, I, L and other easily confusing letters.
 pub const BASIC_CHAR: [char; 54] = [
     '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M',
     'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
     'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-// Define a random color for a string
+/// Define background colors for light and dark modes.
+pub const LIGHT: [u8; 3] = [224, 238, 253];
+pub const DARK: [u8; 3] = [18, 18, 18];
+
+/// Define random text colors for light mode.
 pub const LIGHT_BASIC_COLOR: [[u8; 3]; 5] = [
     [214, 14, 50],
     [240, 181, 41],
@@ -25,6 +32,7 @@ pub const LIGHT_BASIC_COLOR: [[u8; 3]; 5] = [
     [242, 140, 71],
 ];
 
+/// Define random text colors for dark mode.
 pub const DARK_BASIC_COLOR: [[u8; 3]; 5] = [
     [251, 188, 5],
     [116, 192, 255],
@@ -33,28 +41,36 @@ pub const DARK_BASIC_COLOR: [[u8; 3]; 5] = [
     [247, 185, 168],
 ];
 
-// Define background color
-pub const LIGHT: [u8; 3] = [224, 238, 253];
-pub const DARK: [u8; 3] = [18, 18, 18];
-
-// Define font size
+/// Define font sizes.
 pub const SCALE_SM: f32 = 35.0;
 pub const SCALE_MD: f32 = 42.0;
 pub const SCALE_LG: f32 = 50.0;
 
-/***
- * Generate random numbers
- * params num - maximum random number
- */
+// ==========================================
+// UTILITIES (RNG & MATH)
+// ==========================================
+
+/// Generate a random number up to `num` (inclusive).
 pub fn get_rnd(num: usize) -> usize {
     let mut rng = rng();
     rng.random_range(0..=num)
 }
 
-/**
- * Generate an array of captcha characters
- * params num - The number of digits of the verification code and the maximum cannot exceed 53
- */
+/// Generate a random float between `min` and `max`.
+pub fn get_next(min: f32, max: u32) -> f32 {
+    if (max as f32) <= min {
+        return min;
+    }
+    min + get_rnd(max as usize - min as usize) as f32
+}
+
+// ==========================================
+// CAPTCHA GENERATION & CONFIGURATION
+// ==========================================
+
+/// Generate an array of captcha characters.
+/// 
+/// `num` specifies the number of digits/characters in the verification code.
 pub fn get_captcha(num: usize) -> Vec<String> {
     let mut res = vec![];
     for _ in 0..num {
@@ -64,9 +80,7 @@ pub fn get_captcha(num: usize) -> Vec<String> {
     res
 }
 
-/**
- * Get color
- */
+/// Get random color depending on the dark/light mode.
 pub fn get_color(dark_mode: bool) -> Rgb<u8> {
     let rnd = get_rnd(4);
     if dark_mode {
@@ -75,30 +89,13 @@ pub fn get_color(dark_mode: bool) -> Rgb<u8> {
     Rgb(LIGHT_BASIC_COLOR[rnd])
 }
 
-/**
- * Generate random numbers between two numbers
- * params min – minimum
- *        max – maximum value
- * return: random number
- */
-pub fn get_next(min: f32, max: u32) -> f32 {
-    if (max as f32) <= min {
-        return min;
-    }
-    min + get_rnd(max as usize - min as usize) as f32
-}
-
-/**
- * Get font
- */
+/// Get the captcha font from the embedded TTF file.
 pub fn get_font() -> FontArc {
     let font = Vec::from(include_bytes!("../../fonts/arial.ttf") as &[u8]);
     FontArc::try_from_vec(font).unwrap()
 }
 
-/**
- * Get an image with a white background
- */
+/// Get an initialized image buffer with the appropriate background color.
 pub fn get_image(width: u32, height: u32, dark_mode: bool) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     ImageBuffer::from_fn(width, height, |_, _| {
         if dark_mode {
@@ -108,19 +105,21 @@ pub fn get_image(width: u32, height: u32, dark_mode: bool) -> ImageBuffer<Rgb<u8
     })
 }
 
-/**
- * Loop to write captcha characters on background image
- * params res    - Array of verification code characters to be written
- *        image  - Background picture
- */
+// ==========================================
+// DRAWING ROUTINES
+// ==========================================
+
+/// Write the captcha characters on the background image in a layout.
 pub fn cyclic_write_character(
     res: &[String],
     image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     dark_mode: bool,
+    drop_shadow: bool,
 ) {
     if res.is_empty() {
         return;
     }
+    
     let usable_width = image.width().saturating_sub(10);
     let c = usable_width / res.len() as u32;
     let y = (image.height() / 2).saturating_sub(15);
@@ -133,29 +132,43 @@ pub fn cyclic_write_character(
 
     for (i, _) in res.iter().enumerate() {
         let text = &res[i];
+        let color = get_color(dark_mode);
+        let x = 5 + (i as u32 * c) as i32;
+        let font = get_font();
+
+        if drop_shadow {
+            // Draw shadow slightly offset and dark
+            draw_text_mut(
+                image,
+                Rgb([20, 20, 20]), // Dark shadow color
+                x + 2,
+                y as i32 + 2,
+                scale,
+                &font,
+                text,
+            );
+        }
 
         draw_text_mut(
             image,
-            get_color(dark_mode),
-            5 + (i as u32 * c) as i32,
+            color,
+            x,
             y as i32,
             scale,
-            &get_font(),
+            &font,
             text,
         );
     }
 }
 
-/**
- * Draw interference lines
- * params image  - Background picture
- */
+/// Draw a random interference line (bezier curve) on the background picture.
 pub fn draw_interference_line(image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, dark_mode: bool) {
     let width = image.width();
     let height = image.height();
     if width <= 5 || height <= 5 {
         return;
     }
+    
     let x1: f32 = 5.0;
     let y1 = get_next(x1, height / 2);
 
@@ -179,11 +192,7 @@ pub fn draw_interference_line(image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, dark_mo
     );
 }
 
-/**
- * Draw a distraction circle
- * params num    - Number of circles drawn
- *        image  - Background picture
- */
+/// Draw a distraction circle (hollow ellipse) in random positions.
 pub fn draw_interference_ellipse(
     num: usize,
     image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
@@ -200,10 +209,50 @@ pub fn draw_interference_ellipse(
     }
 }
 
-/**
- * Convert image to JPEG base64 string
- * parma image - Image
- */
+// ==========================================
+// EFFECTS
+// ==========================================
+
+/// Apply wavy pixel-level distortion to the image to deter OCR bots.
+pub fn apply_wavy_distortion(image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, level: u32) {
+    if level == 0 {
+        return;
+    }
+    
+    let width = image.width();
+    let height = image.height();
+    let mut new_image = image.clone();
+    let mut rng = rng();
+    
+    // Randomize the wave phase and frequency slightly
+    let phase: f32 = rng.random_range(0.0..std::f32::consts::PI * 2.0);
+    // Amplitude is related to distortion level, capped for readability
+    let amplitude = (level as f32) * 1.5;
+    let frequency = 0.05 + (rng.random_range(0.0..0.05) * level as f32);
+
+    for y in 0..height {
+        for x in 0..width {
+            // Calculate pixel displacement using a sine wave
+            let offset_x = (amplitude * ((y as f32 * frequency) + phase).sin()) as i32;
+            let offset_y = (amplitude * ((x as f32 * frequency) + phase).cos()) as i32;
+            
+            let src_x = (x as i32 + offset_x).clamp(0, width as i32 - 1) as u32;
+            let src_y = (y as i32 + offset_y).clamp(0, height as i32 - 1) as u32;
+            
+            // Map the source pixel to the destination
+            let pixel = image.get_pixel(src_x, src_y);
+            new_image.put_pixel(x, y, *pixel);
+        }
+    }
+    
+    *image = new_image;
+}
+
+// ==========================================
+// EXPORT & CONVERSION
+// ==========================================
+
+/// Convert a `DynamicImage` to a JPEG base64 Data URI string.
 pub fn to_base64_str(image: &DynamicImage, compression: u8) -> String {
     let mut buf = Cursor::new(Vec::new());
     let mut encoder = JpegEncoder::new_with_quality(&mut buf, compression);

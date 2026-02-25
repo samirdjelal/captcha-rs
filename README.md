@@ -31,6 +31,14 @@ Level 8 | ![img-light](images/img-light-complexity-8.png)  | ![img-dark](images/
 Level 9 | ![img-light](images/img-light-complexity-9.png)  | ![img-dark](images/img-dark-complexity-9.png)
 Level 10 | ![img-light](images/img-light-complexity-10.png) | ![img-dark](images/img-dark-complexity-10.png)
 
+### Using Visual Enhancements and Bot Deterrence
+
+Effect | Image example
+--- | ---
+Drop Shadow | ![img-light-shadow](images/img-light-shadow.png)
+Heavy Interference | ![img-light-heavy-interference](images/img-light-heavy-interference.png)
+Mild Distortion | ![img-light-distortion-mild](images/img-light-distortion-mild.png)
+Heavy Distortion | ![img-light-distortion-heavy](images/img-light-distortion-heavy.png)
 
 ## Example
 
@@ -55,6 +63,10 @@ fn main() {
 		.dark_mode(false)
 		.complexity(1) // min: 1, max: 10
 		.compression(40) // min: 1, max: 99
+		.drop_shadow(false) // Adds a drop shadow to the text
+		.interference_lines(2) // Number of interference lines (min 0)
+		.interference_ellipses(2) // Number of distraction circles (min 0)
+		.distortion(0) // Level of wavy distortion grid (min 0)
 		.build();
 	
 	println!("text: {}", captcha.text);
