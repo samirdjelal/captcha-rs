@@ -1,3 +1,5 @@
+[![captcha-rs banner](images/banner.png)](https://github.com/samirdjelal/captcha-rs)
+
 # captcha-rs
 
 [![Captcha-rs crate](https://img.shields.io/crates/v/captcha-rs.svg?style=flat&logo=appveyor)](https://crates.io/crates/captcha-rs)
@@ -46,7 +48,7 @@ Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.3.0"
+captcha-rs = "0.4.0"
 ```
 
 And then get started in your `main.rs`:
