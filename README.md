@@ -48,7 +48,7 @@ Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.4.1"
+captcha-rs = "0.4.2"
 ```
 
 And then get started in your `main.rs`:
@@ -98,9 +98,9 @@ The library is highly optimized for fast image generation. The table below repre
 | Configuration | Time per Image | Core Settings |
 | --- | --- | --- |
 | **Default** | `~53 µs` | length=5, 130x40 |
-| **High Complexity** | `~439 µs` | length=5, 200x70, complexity=10 |
-| **High Distortion** | `~160 µs` | length=5, 200x70, distortion=15 |
-| **Extreme Security** | `~1.16 ms` | length=8, 300x100, complexity=10, distortion=20, drop_shadow, high interference |
+| **High Complexity** | `~404 µs` | length=5, 200x70, complexity=10 |
+| **High Distortion** | `~157 µs` | length=5, 200x70, distortion=15 |
+| **Extreme Security** | `~1.10 ms` | length=8, 300x100, complexity=10, distortion=20, drop_shadow, high interference |
 
 *Note: Benchmarks run on a single thread using `cargo bench`. Performance will vary based on hardware, but standard generation should easily exceed thousands of images per second.*
 
