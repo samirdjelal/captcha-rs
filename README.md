@@ -48,7 +48,7 @@ Add the following dependency to the Cargo.toml file:
 
 ```toml
 [dependencies]
-captcha-rs = "0.4.2"
+captcha-rs = { version = "0.5.0", features = ["stateless"] }
 ```
 
 And then get started in your `main.rs`:
@@ -75,6 +75,35 @@ fn main() {
 	println!("text: {}", captcha.text);
 	println!("base_img: {}", captcha.to_base64());
 	
+}
+```
+
+### Stateless Verification (Serverless)
+
+With the `stateless` feature enabled, you can generate a time-bound JWT token that contains a secure hash of the captcha solution. This allows you to verify the user's input on a different server or at a later time without storing the solution in a database or session.
+
+```rust
+use captcha_rs::{CaptchaBuilder, verify};
+
+fn main() {
+    let secret = "your-very-secure-secret";
+    
+    // 1. Generate captcha and token
+    let captcha = CaptchaBuilder::new().length(5).build();
+    let (image_base64, token) = captcha.as_tuple(secret, 300).unwrap(); // 5 min expiry
+    
+    println!("Base64 Image: {}", image_base64);
+    println!("Verification Token: {}", token);
+
+    // 2. Later, verify the solution provided by the user
+    let user_solution = "abc12"; // This would come from the user's request
+    let is_valid = verify(&token, user_solution, secret).unwrap_or(false);
+    
+    if is_valid {
+        println!("Captcha verified successfully!");
+    } else {
+        println!("Invalid captcha or token expired.");
+    }
 }
 ```
 
