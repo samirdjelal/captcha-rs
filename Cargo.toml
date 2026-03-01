@@ -32,5 +32,9 @@ criterion = "0.5.1"
 name = "captcha_bench"
 harness = false
 
+[[example]]
+name = "stateless"
+required-features = ["stateless"]
+
 [features]
 stateless = ["dep:jsonwebtoken", "dep:serde", "dep:sha2"]
