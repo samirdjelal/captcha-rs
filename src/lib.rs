@@ -36,10 +36,79 @@ pub struct Captcha {
     pub dark_mode: bool,
 }
 
+#[cfg(feature = "stateless")]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct Claims {
+    hash: String,
+    exp: usize,
+}
+
 impl Captcha {
     pub fn to_base64(&self) -> String {
         to_base64_str(&self.image, self.compression)
     }
+
+    #[cfg(feature = "stateless")]
+    pub fn as_token(&self, secret: &str, expiration_seconds: u64) -> Option<String> {
+        use jsonwebtoken::{encode, EncodingKey, Header};
+        use sha2::{Digest, Sha256};
+        use std::time::{SystemTime, UNIX_EPOCH};
+
+        let exp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_secs()
+            + expiration_seconds;
+
+        let mut hasher = Sha256::new();
+        hasher.update(secret.as_bytes());
+        hasher.update(self.text.to_lowercase().as_bytes());
+        let hash_result = hasher.finalize();
+        let hash = base64::Engine::encode(
+            &base64::engine::general_purpose::URL_SAFE_NO_PAD,
+            hash_result,
+        );
+
+        let claims = Claims {
+            hash,
+            exp: exp as usize,
+        };
+
+        encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret(secret.as_ref()),
+        ).ok()
+    }
+
+    #[cfg(feature = "stateless")]
+    pub fn as_tuple(&self, secret: &str, expiration_seconds: u64) -> Option<(String, String)> {
+        self.as_token(secret, expiration_seconds)
+            .map(|token| (self.to_base64(), token))
+    }
+}
+
+#[cfg(feature = "stateless")]
+pub fn verify(token: &str, provided_solution: &str, secret: &str) -> Option<bool> {
+    use jsonwebtoken::{decode, DecodingKey, Validation};
+    use sha2::{Digest, Sha256};
+
+    let token_data = decode::<Claims>(
+        token,
+        &DecodingKey::from_secret(secret.as_ref()),
+        &Validation::default(),
+    ).ok()?;
+
+    let mut hasher = Sha256::new();
+    hasher.update(secret.as_bytes());
+    hasher.update(provided_solution.to_lowercase().as_bytes());
+    let expected_hash_result = hasher.finalize();
+    let expected_hash = base64::Engine::encode(
+        &base64::engine::general_purpose::URL_SAFE_NO_PAD,
+        expected_hash_result,
+    );
+
+    Some(token_data.claims.hash == expected_hash)
 }
 
 #[derive(Default)]
@@ -297,5 +366,40 @@ mod tests {
         assert!(captcha.text.chars().all(|c| c == 'A' || c == 'B'));
         let base_img = captcha.to_base64();
         assert!(base_img.starts_with("data:image/jpeg;base64,"));
+    }
+
+    #[test]
+    #[cfg(feature = "stateless")]
+    fn it_generates_and_verifies_jwt() {
+        let captcha = CaptchaBuilder::new()
+            .text(String::from("TestJWT"))
+            .width(200)
+            .height(70)
+            .build();
+
+        let secret = "supersecretkey";
+
+        // Test as_tuple
+        let (base64, tuple_token) = captcha.as_tuple(secret, 60).expect("Failed to create tuple");
+        assert!(base64.starts_with("data:image/jpeg;base64,"));
+        assert!(!tuple_token.is_empty());
+
+        let token = captcha.as_token(secret, 60).expect("Failed to create JWT");
+
+        // Valid test
+        let result = crate::verify(&token, "testjwt", secret).expect("Failed to verify JWT");
+        assert!(result);
+
+        // Invalid solution test
+        let invalid_result = crate::verify(&token, "wrong", secret);
+        assert_eq!(invalid_result.unwrap(), false);
+
+        // Invalid secret test
+        let invalid_secret_result = crate::verify(&token, "testjwt", "wrongsecret");
+        assert!(invalid_secret_result.is_none());
+
+        // Invalid token test
+        let invalid_token_result = crate::verify("invalid_token_string", "testjwt", secret);
+        assert!(invalid_token_result.is_none());
     }
 }
