@@ -49,7 +49,7 @@ impl Captcha {
     }
 
     #[cfg(feature = "stateless")]
-    pub fn to_jwt(&self, secret: &str, expiration_seconds: u64) -> Result<String, jsonwebtoken::errors::Error> {
+    pub fn as_token(&self, secret: &str, expiration_seconds: u64) -> Option<String> {
         use jsonwebtoken::{encode, EncodingKey, Header};
         use sha2::{Digest, Sha256};
         use std::time::{SystemTime, UNIX_EPOCH};
@@ -78,12 +78,18 @@ impl Captcha {
             &Header::default(),
             &claims,
             &EncodingKey::from_secret(secret.as_ref()),
-        )
+        ).ok()
+    }
+
+    #[cfg(feature = "stateless")]
+    pub fn as_tuple(&self, secret: &str, expiration_seconds: u64) -> Option<(String, String)> {
+        self.as_token(secret, expiration_seconds)
+            .map(|token| (self.to_base64(), token))
     }
 }
 
 #[cfg(feature = "stateless")]
-pub fn verify_jwt(token: &str, secret: &str, provided_solution: &str) -> Result<bool, jsonwebtoken::errors::Error> {
+pub fn verify(token: &str, provided_solution: &str, secret: &str) -> Option<bool> {
     use jsonwebtoken::{decode, DecodingKey, Validation};
     use sha2::{Digest, Sha256};
 
@@ -91,7 +97,7 @@ pub fn verify_jwt(token: &str, secret: &str, provided_solution: &str) -> Result<
         token,
         &DecodingKey::from_secret(secret.as_ref()),
         &Validation::default(),
-    )?;
+    ).ok()?;
 
     let mut hasher = Sha256::new();
     hasher.update(secret.as_bytes());
@@ -102,7 +108,7 @@ pub fn verify_jwt(token: &str, secret: &str, provided_solution: &str) -> Result<
         expected_hash_result,
     );
 
-    Ok(token_data.claims.hash == expected_hash)
+    Some(token_data.claims.hash == expected_hash)
 }
 
 #[derive(Default)]
@@ -372,21 +378,28 @@ mod tests {
             .build();
 
         let secret = "supersecretkey";
-        let token = captcha.to_jwt(secret, 60).expect("Failed to create JWT");
+
+        // Test as_tuple
+        let (base64, tuple_token) = captcha.as_tuple(secret, 60).expect("Failed to create tuple");
+        assert!(base64.starts_with("data:image/jpeg;base64,"));
+        assert!(!tuple_token.is_empty());
+
+        let token = captcha.as_token(secret, 60).expect("Failed to create JWT");
 
         // Valid test
-        let result = crate::verify_jwt(&token, secret, "testjwt").expect("Failed to verify JWT");
+        let result = crate::verify(&token, "testjwt", secret).expect("Failed to verify JWT");
         assert!(result);
 
         // Invalid solution test
-        let invalid_result = crate::verify_jwt(&token, secret, "wrong");
+        let invalid_result = crate::verify(&token, "wrong", secret);
         assert_eq!(invalid_result.unwrap(), false);
 
-        // Expired token test
-        let _expired_token = captcha.to_jwt(secret, 0).expect("Failed to create expired JWT");
-        // Due to default jsonwebtoken leeway of 60s, a 0 second expiration might still be valid for 60s,
-        // but we can just check invalid secret.
-        let invalid_secret_result = crate::verify_jwt(&token, "wrongsecret", "testjwt");
-        assert!(invalid_secret_result.is_err());
+        // Invalid secret test
+        let invalid_secret_result = crate::verify(&token, "testjwt", "wrongsecret");
+        assert!(invalid_secret_result.is_none());
+
+        // Invalid token test
+        let invalid_token_result = crate::verify("invalid_token_string", "testjwt", secret);
+        assert!(invalid_token_result.is_none());
     }
 }
