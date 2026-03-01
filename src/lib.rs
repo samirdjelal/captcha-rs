@@ -77,12 +77,12 @@ impl CaptchaBuilder {
     }
 
     pub fn text(mut self, text: String) -> Self {
-        self.text = Some(text);
+        self.text = Some(text.chars().take(32).collect());
         self
     }
 
     pub fn length(mut self, length: usize) -> Self {
-        self.length = length.max(1);
+        self.length = length.clamp(1, 32);
         self
     }
 
@@ -122,17 +122,17 @@ impl CaptchaBuilder {
     }
 
     pub fn interference_lines(mut self, lines: usize) -> Self {
-        self.interference_lines = lines;
+        self.interference_lines = lines.min(100);
         self
     }
 
     pub fn interference_ellipses(mut self, ellipses: usize) -> Self {
-        self.interference_ellipses = ellipses;
+        self.interference_ellipses = ellipses.min(100);
         self
     }
 
     pub fn distortion(mut self, distortion: u32) -> Self {
-        self.distortion = distortion;
+        self.distortion = distortion.min(100);
         self
     }
 
