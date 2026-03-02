@@ -127,6 +127,7 @@ pub struct CaptchaBuilder {
     interference_lines: usize,
     interference_ellipses: usize,
     distortion: u32,
+    font: Option<Vec<u8>>,
 }
 
 impl CaptchaBuilder {
@@ -144,6 +145,7 @@ impl CaptchaBuilder {
             interference_lines: 2,
             interference_ellipses: 2,
             distortion: 0,
+            font: None,
         }
     }
 
@@ -207,6 +209,11 @@ impl CaptchaBuilder {
         self
     }
 
+    pub fn font(mut self, font: &[u8]) -> Self {
+        self.font = Some(font.to_vec());
+        self
+    }
+
     pub fn build(self) -> Captcha {
         let text = match self.text {
             Some(t) if !t.is_empty() => t,
@@ -219,7 +226,13 @@ impl CaptchaBuilder {
         let res: Vec<String> = text.chars().map(|x| x.to_string()).collect();
 
         // Loop to write the verification code string into the background image
-        cyclic_write_character(&res, &mut image, self.dark_mode, self.drop_shadow);
+        cyclic_write_character(
+            &res,
+            &mut image,
+            self.dark_mode,
+            self.drop_shadow,
+            self.font.as_deref(),
+        );
 
         if self.distortion > 0 {
             captcha::apply_wavy_distortion(&mut image, self.distortion);
@@ -366,6 +379,36 @@ mod tests {
 
         assert_eq!(captcha.text.len(), 10);
         assert!(captcha.text.chars().all(|c| c == 'A' || c == 'B'));
+        let base_img = captcha.to_base64();
+        assert!(base_img.starts_with("data:image/jpeg;base64,"));
+    }
+
+    #[test]
+    fn it_handles_custom_font_fallback() {
+        let invalid_font = vec![0, 1, 2, 3]; // Invalid font bytes
+        let captcha = CaptchaBuilder::new()
+            .text(String::from("fallback"))
+            .font(&invalid_font)
+            .width(200)
+            .height(70)
+            .build();
+
+        assert_eq!(captcha.text, "fallback");
+        let base_img = captcha.to_base64();
+        assert!(base_img.starts_with("data:image/jpeg;base64,"));
+    }
+
+    #[test]
+    fn it_handles_custom_font_success() {
+        let font_bytes = include_bytes!("../fonts/arial.ttf");
+        let captcha = CaptchaBuilder::new()
+            .text(String::from("customfont"))
+            .font(font_bytes)
+            .width(200)
+            .height(70)
+            .build();
+
+        assert_eq!(captcha.text, "customfont");
         let base_img = captcha.to_base64();
         assert!(base_img.starts_with("data:image/jpeg;base64,"));
     }
