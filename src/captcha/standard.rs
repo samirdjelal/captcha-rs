@@ -61,7 +61,8 @@ pub fn get_next(min: f32, max: u32) -> f32 {
     if (max as f32) <= min {
         return min;
     }
-    min + get_rnd(max as usize - min as usize) as f32
+    let mut rng = rng();
+    rng.random_range(min..=(max as f32))
 }
 
 // ==========================================
