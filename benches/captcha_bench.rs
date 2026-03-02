@@ -1,5 +1,5 @@
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use captcha_rs::CaptchaBuilder;
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 
 fn bench_captcha_generation(c: &mut Criterion) {
     let mut group = c.benchmark_group("Captcha Generation");
