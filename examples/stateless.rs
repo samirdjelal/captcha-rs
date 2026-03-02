@@ -21,7 +21,8 @@ fn main() {
     // 2. Generate a verification token (stateless)
     // We'll set an expiration time of 5 minutes (300 seconds)
     // as_tuple returns (base64_image, token)
-    let (image_base64, token) = captcha.as_tuple(secret, 300)
+    let (image_base64, token) = captcha
+        .as_tuple(secret, 300)
         .expect("Failed to generate stateless token. Make sure 'stateless' feature is enabled.");
 
     println!("Base64 Image (truncated): {}...", &image_base64[..50]);
@@ -46,8 +47,7 @@ fn main() {
     let wrong_solution = "wrong123";
     println!("\nUser provides wrong solution: {}", wrong_solution);
 
-    let is_valid_wrong = verify(&token, wrong_solution, secret)
-        .unwrap_or(false);
+    let is_valid_wrong = verify(&token, wrong_solution, secret).unwrap_or(false);
 
     if is_valid_wrong {
         println!("✅ Success: Captcha verified successfully!");
@@ -58,7 +58,7 @@ fn main() {
     // 5. Simulate verification with a different secret (should fail to decode)
     println!("\nVerifying with wrong secret...");
     let result_wrong_secret = verify(&token, &user_solution, "wrong-secret");
-    
+
     match result_wrong_secret {
         Some(_) => println!("❌ Error: Should not have successfully decoded with wrong secret!"),
         None => println!("✅ Success: Failed to decode as expected due to secret mismatch."),

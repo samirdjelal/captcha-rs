@@ -1,11 +1,12 @@
 use ab_glyph::FontArc;
-use base64::engine::general_purpose;
 use base64::Engine;
+use base64::engine::general_purpose;
 use image::codecs::jpeg::JpegEncoder;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imageproc::drawing::{draw_cubic_bezier_curve_mut, draw_hollow_ellipse_mut, draw_text_mut};
-use rand::{rng, Rng};
+use rand::{Rng, rng};
 use std::io::Cursor;
+use std::sync::LazyLock;
 
 // ==========================================
 // CONSTANTS
@@ -69,7 +70,7 @@ pub fn get_next(min: f32, max: u32) -> f32 {
 // ==========================================
 
 /// Generate an array of captcha characters from the given character set.
-/// 
+///
 /// `num` specifies the number of digits/characters in the verification code.
 pub fn get_captcha(num: usize, chars: &[char]) -> Vec<String> {
     let mut res = vec![];
@@ -91,10 +92,14 @@ pub fn get_color(dark_mode: bool) -> Rgb<u8> {
     Rgb(LIGHT_BASIC_COLOR[rnd])
 }
 
-/// Get the captcha font from the embedded TTF file.
-pub fn get_font() -> FontArc {
+static FONT: LazyLock<FontArc> = LazyLock::new(|| {
     let font = Vec::from(include_bytes!("../../fonts/arial.ttf") as &[u8]);
     FontArc::try_from_vec(font).unwrap()
+});
+
+/// Get the captcha font from the embedded TTF file.
+pub fn get_font() -> FontArc {
+    FONT.clone()
 }
 
 /// Get an initialized image buffer with the appropriate background color.
@@ -121,7 +126,7 @@ pub fn cyclic_write_character(
     if res.is_empty() {
         return;
     }
-    
+
     let usable_width = image.width().saturating_sub(10);
     let c = usable_width / res.len() as u32;
     let y = (image.height() / 2).saturating_sub(15);
@@ -151,15 +156,7 @@ pub fn cyclic_write_character(
             );
         }
 
-        draw_text_mut(
-            image,
-            color,
-            x,
-            y as i32,
-            scale,
-            &font,
-            text,
-        );
+        draw_text_mut(image, color, x, y as i32, scale, &font, text);
     }
 }
 
@@ -170,7 +167,7 @@ pub fn draw_interference_line(image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, dark_mo
     if width <= 5 || height <= 5 {
         return;
     }
-    
+
     let x1: f32 = 5.0;
     let y1 = get_next(x1, height / 2);
 
@@ -220,12 +217,12 @@ pub fn apply_wavy_distortion(image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, level: u
     if level == 0 {
         return;
     }
-    
+
     let width = image.width();
     let height = image.height();
     let mut new_image = image.clone();
     let mut rng = rng();
-    
+
     // Randomize the wave phase and frequency slightly
     let phase: f32 = rng.random_range(0.0..std::f32::consts::PI * 2.0);
     // Amplitude is related to distortion level, capped for readability
@@ -237,16 +234,16 @@ pub fn apply_wavy_distortion(image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, level: u
             // Calculate pixel displacement using a sine wave
             let offset_x = (amplitude * ((y as f32 * frequency) + phase).sin()) as i32;
             let offset_y = (amplitude * ((x as f32 * frequency) + phase).cos()) as i32;
-            
+
             let src_x = (x as i32 + offset_x).clamp(0, width as i32 - 1) as u32;
             let src_y = (y as i32 + offset_y).clamp(0, height as i32 - 1) as u32;
-            
+
             // Map the source pixel to the destination
             let pixel = image.get_pixel(src_x, src_y);
             new_image.put_pixel(x, y, *pixel);
         }
     }
-    
+
     *image = new_image;
 }
 

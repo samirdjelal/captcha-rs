@@ -20,7 +20,7 @@
 //! ```
 use image::DynamicImage;
 use imageproc::noise::{gaussian_noise_mut, salt_and_pepper_noise_mut};
-use rand::{rng, Rng};
+use rand::{Rng, rng};
 
 use crate::captcha::{
     cyclic_write_character, draw_interference_ellipse, draw_interference_line, get_image,
@@ -50,7 +50,7 @@ impl Captcha {
 
     #[cfg(feature = "stateless")]
     pub fn as_token(&self, secret: &str, expiration_seconds: u64) -> Option<String> {
-        use jsonwebtoken::{encode, EncodingKey, Header};
+        use jsonwebtoken::{EncodingKey, Header, encode};
         use sha2::{Digest, Sha256};
         use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -78,7 +78,8 @@ impl Captcha {
             &Header::default(),
             &claims,
             &EncodingKey::from_secret(secret.as_ref()),
-        ).ok()
+        )
+        .ok()
     }
 
     #[cfg(feature = "stateless")]
@@ -90,14 +91,15 @@ impl Captcha {
 
 #[cfg(feature = "stateless")]
 pub fn verify(token: &str, provided_solution: &str, secret: &str) -> Option<bool> {
-    use jsonwebtoken::{decode, DecodingKey, Validation};
+    use jsonwebtoken::{DecodingKey, Validation, decode};
     use sha2::{Digest, Sha256};
 
     let token_data = decode::<Claims>(
         token,
         &DecodingKey::from_secret(secret.as_ref()),
         &Validation::default(),
-    ).ok()?;
+    )
+    .ok()?;
 
     let mut hasher = Sha256::new();
     hasher.update(secret.as_bytes());
@@ -380,7 +382,9 @@ mod tests {
         let secret = "supersecretkey";
 
         // Test as_tuple
-        let (base64, tuple_token) = captcha.as_tuple(secret, 60).expect("Failed to create tuple");
+        let (base64, tuple_token) = captcha
+            .as_tuple(secret, 60)
+            .expect("Failed to create tuple");
         assert!(base64.starts_with("data:image/jpeg;base64,"));
         assert!(!tuple_token.is_empty());
 
