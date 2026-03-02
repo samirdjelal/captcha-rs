@@ -124,6 +124,7 @@ pub fn cyclic_write_character(
     image: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     dark_mode: bool,
     drop_shadow: bool,
+    custom_font: Option<&[u8]>,
 ) {
     if res.is_empty() {
         return;
@@ -139,7 +140,9 @@ pub fn cyclic_write_character(
         _ => SCALE_SM,
     };
 
-    let font = get_font();
+    let font = custom_font
+        .and_then(|f| FontArc::try_from_vec(f.to_vec()).ok())
+        .unwrap_or_else(get_font);
 
     for (i, _) in res.iter().enumerate() {
         let text = &res[i];

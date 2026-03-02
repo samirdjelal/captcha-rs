@@ -64,6 +64,7 @@ fn main() {
 		.height(40)
 		.dark_mode(false)
 		.chars(vec!['A', 'B', 'C', 'D']) // Optional custom characters
+		.font(include_bytes!("../fonts/arial.ttf")) // Optional custom TTF font (fallback to embedded if failed)
 		.complexity(1) // min: 1, max: 10
 		.compression(40) // min: 1, max: 99
 		.drop_shadow(false) // Adds a drop shadow to the text
@@ -75,6 +76,30 @@ fn main() {
 	println!("text: {}", captcha.text);
 	println!("base_img: {}", captcha.to_base64());
 	
+}
+```
+
+### Using Custom TTF Fonts
+
+By default, the library embeds a standard `arial.ttf` font for CAPTCHA generation to ensure the library works out of the box without any external dependencies.
+
+However, you can supply your own `.ttf` font by loading its bytes into memory and passing them to the `.font(&[u8])` method in `CaptchaBuilder`. If the provided custom font is invalid or fails to load, it will gracefully fall back to the embedded standard font.
+
+```rust
+use captcha_rs::CaptchaBuilder;
+
+fn main() {
+    // Read the custom font file into a byte slice.
+    // In this example we use include_bytes!, but std::fs::read also works.
+    let my_custom_font = include_bytes!("../fonts/arial.ttf");
+
+    let captcha = CaptchaBuilder::new()
+        .font(my_custom_font)
+        .length(5)
+        .build();
+
+    println!("text: {}", captcha.text);
+    println!("base_img: {}", captcha.to_base64());
 }
 ```
 
