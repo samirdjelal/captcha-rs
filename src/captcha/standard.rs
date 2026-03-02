@@ -6,6 +6,7 @@ use image::{DynamicImage, ImageBuffer, Rgb};
 use imageproc::drawing::{draw_cubic_bezier_curve_mut, draw_hollow_ellipse_mut, draw_text_mut};
 use rand::{rng, Rng};
 use std::io::Cursor;
+use std::sync::OnceLock;
 
 // ==========================================
 // CONSTANTS
@@ -92,10 +93,15 @@ pub fn get_color(dark_mode: bool) -> Rgb<u8> {
     Rgb(LIGHT_BASIC_COLOR[rnd])
 }
 
+static FONT: OnceLock<FontArc> = OnceLock::new();
+
 /// Get the captcha font from the embedded TTF file.
 pub fn get_font() -> FontArc {
-    let font = Vec::from(include_bytes!("../../fonts/arial.ttf") as &[u8]);
-    FontArc::try_from_vec(font).unwrap()
+    FONT.get_or_init(|| {
+        let font = Vec::from(include_bytes!("../../fonts/arial.ttf") as &[u8]);
+        FontArc::try_from_vec(font).unwrap()
+    })
+    .clone()
 }
 
 /// Get an initialized image buffer with the appropriate background color.
@@ -133,11 +139,12 @@ pub fn cyclic_write_character(
         _ => SCALE_SM,
     };
 
+    let font = get_font();
+
     for (i, _) in res.iter().enumerate() {
         let text = &res[i];
         let color = get_color(dark_mode);
         let x = 5 + (i as u32 * c) as i32;
-        let font = get_font();
 
         if drop_shadow {
             // Draw shadow slightly offset and dark
