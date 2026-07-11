@@ -29,6 +29,8 @@ use crate::captcha::{
 
 mod captcha;
 
+pub use captcha::{JPEG_DATA_URI_PREFIX, is_empty_base64};
+
 pub struct Captcha {
     pub text: String,
     pub image: DynamicImage,
@@ -262,6 +264,19 @@ impl CaptchaBuilder {
 #[cfg(test)]
 mod tests {
     use crate::CaptchaBuilder;
+
+    #[test]
+    fn it_detects_empty_base64_prefix() {
+        assert!(crate::is_empty_base64(crate::JPEG_DATA_URI_PREFIX));
+        assert!(!crate::is_empty_base64("data:image/jpeg;base64,abc"));
+
+        let captcha = CaptchaBuilder::new()
+            .text(String::from("ok"))
+            .width(130)
+            .height(40)
+            .build();
+        assert!(!crate::is_empty_base64(&captcha.to_base64()));
+    }
 
     #[test]
     fn it_generates_a_captcha() {
