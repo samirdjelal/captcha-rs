@@ -20,6 +20,9 @@ pub const BASIC_CHAR: [char; 54] = [
     'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
+/// Define the prefix for the JPEG data URI.
+pub const JPEG_DATA_URI_PREFIX: &str = "data:image/jpeg;base64,";
+
 /// Define background colors for light and dark modes.
 pub const LIGHT: [u8; 3] = [224, 238, 253];
 pub const DARK: [u8; 3] = [18, 18, 18];
@@ -259,8 +262,14 @@ pub fn to_base64_str(image: &DynamicImage, compression: u8) -> String {
     let mut buf = Cursor::new(Vec::new());
     let mut encoder = JpegEncoder::new_with_quality(&mut buf, compression);
     if encoder.encode_image(image).is_err() {
-        return "data:image/jpeg;base64,".to_string();
+        return JPEG_DATA_URI_PREFIX.to_string();
     }
     let res_base64 = general_purpose::STANDARD.encode(buf.into_inner());
-    format!("data:image/jpeg;base64,{}", res_base64)
+    format!("{JPEG_DATA_URI_PREFIX}{}", res_base64)
+}
+
+/// Returns `true` when [`Captcha::to_base64`](crate::Captcha::to_base64) failed to encode
+/// and only returned the empty JPEG data URI prefix.
+pub fn is_empty_base64(base64: &str) -> bool {
+    base64 == JPEG_DATA_URI_PREFIX
 }
